@@ -9,7 +9,6 @@ use IO::Dir;
 use File::stat;
 use Data::Dumper;
 use Fatal qw(open close);
-use UNIVERSAL qw( isa can VERSION );
 
 require Exporter;
 
@@ -30,7 +29,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 # Preloaded methods go here.
 #------------------------------------------------------------------------------
@@ -517,9 +516,11 @@ sub SetOpt($)
 #------------------------------------------------------------------------------
 sub _getParam(@)
 {
-    if( isa( $_[0], "Script::Toolbox::Util" ))
+    #if( isa( $_[0], "Script::Toolbox::Util" ))
+    my $x = ref $_[0];
+    if( $x =~ /Script::Toolbox/  )
     {
-	shift @_;
+	shift @_ if( $_[0]->isa("Script::Toolbox::Util" ));
     }
     return @_;
 }

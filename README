@@ -1,3 +1,10 @@
+Script::Toolbox version 0.11
+============================
+use UNIVERSAL qw(isa);
+=> cause an error on RedHat. Version 0.11 comes without usage of UNIVERSAL.
+
+
+
 Script::Toolbox version 0.10
 ============================
 This version fixes some minor bugs in the 'Usage' message part.
