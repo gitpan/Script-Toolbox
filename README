@@ -1,3 +1,8 @@
+Script::Toolbox version 0.12
+============================
+0.12 fixes a little mistake in the POD section of Script::Toolbox 
+(nothing dangerous :-)
+
 Script::Toolbox version 0.11
 ============================
 use UNIVERSAL qw(isa);

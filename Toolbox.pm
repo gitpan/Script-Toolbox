@@ -24,7 +24,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 
 # Preloaded methods go here.
@@ -50,7 +50,7 @@ Script::Toolbox - Framework for the daily business scripts
   Log( "log message", 'STDERR' ); # log to STDERR
   Log( "log message", 'STDOUT' ); # log to STDOUT
   Log( "log message", '/tmp/x' ); # log to /tmp/x
-  Log( "log message", new IO::File "/tmp/XXX" # log to /tmp/XXX
+  Log( "log message", new IO::File "/tmp/XXX" ); # log to /tmp/XXX
 
   Script::Toolbox->new({logdir=>{mod=>'=s',desc=>'Log directory',
             mand=>1,default=>'/var/log'}});
