@@ -1,0 +1,16 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         Script-Toolbox
+version:      0.09
+version_from: Util/Util.pm
+installdirs:  site
+requires:
+    Data::Dumper:                  2.121
+    Fatal:                         1.03
+    File::stat:                    1
+    IO::Dir:                       1.04
+    IO::File:                      1.1
+    UNIVERSAL:                     1.01
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17
