@@ -155,10 +155,8 @@ sub _processCmdLine($)
 	my ( $self ) = @_;
 	my @opt = _mkOps( $self->{'opsDef'} );
 
-	#my $rc = GetOptions( $self, (@opt) );
 	my $rc = GetOptions( $self, (@opt) );
-	$self->usage(), die 1  if( ! $rc );
-
+	$self->usage(), exit 1  if( ! $rc );
 	$self->_checkOps();
 }
 
@@ -169,25 +167,22 @@ sub _processCmdLine($)
 #------------------------------------------------------------------------------
 sub _checkOps($)
 {
-	my ( $self ) = @_;
+    my ( $self ) = @_;
+    system( "perldoc $0" ),exit 0 if( defined $self->{'help'} );
 
-	foreach ( keys %{$self->{'opsDef'}} )
-	{
-		$self->setDefaults( $_ ) || $self->_errorExit(2);
-	};
+    my $errMsg;
+    foreach ( keys %{$self->{'opsDef'}} )
+    {
+        $errMsg .= "Missing mandatory option '$_'.\n"
+            if( ! $self->setDefaults( $_ ));
+    }
 
-	system( "perldoc $0" )	if( defined $self->{'help'} );
-	$self->usage()         	if( $self->{'usage'} );
-}
-
-#------------------------------------------------------------------------------
-# Sorry, nothing doing!
-#------------------------------------------------------------------------------
-sub _errorExit($$)
-{
-	my ($self,$exitCode) = @_;
-	$self->usage();
-	die $exitCode;
+    if( defined $errMsg )
+    {
+        print STDERR $errMsg;
+        $self->usage();
+        exit 2;
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -268,7 +263,7 @@ sub _calcForm($)
 	foreach my $op ( values %{$ops} )
 	{
 		my $ln = length $op->{'usage'};
-		my $ad = defined $op->{'mand'} ? 0 : 2;
+		my $ad = _optionaly($op) ? 2 : 0;
 
 		$max = $ln+$ad > $max ? $ln+$ad : $max;
 	}
@@ -306,21 +301,31 @@ sub _getOpDesc($)
 	my ( $op, $max, $cols ) = @_;
 
 	my $rc;
-	if( ! defined $op->{'mand'} )
+	if( _optionaly($op) )
 	{
 		$rc = '[' . $op->{'usage'} . ']';
 	}else{
 		$rc = $op->{'usage'};
 	}
-	my $desc;
-	#if( length( $op->{'desc'} )+ $max > $cols )
-	#{
-		$desc = _insertNL( $op,  $max, $cols );
-	#}else{
-		#$desc = $op->{'desc'};
-	#}
+	my $desc = _insertNL( $op,  $max, $cols );
 	return ( $rc, $desc );
 }
+#-----------------------------------------------------------------------------
+#  Return false if the option is madatory and has no default value.
+#  Return true otherwise.
+#-----------------------------------------------------------------------------
+sub _optionaly($)
+{
+    my ($op) = @_;
+
+    if( defined $op->{'mand'})
+    {
+        return 1 if( ! $op->{'mand'} );
+        return 0 if( ! defined $op->{'default'} );
+    }
+    return 1
+}
+
 
 #-----------------------------------------------------------------------------
 # Fold line into two lines if line length exceeds number of columns .

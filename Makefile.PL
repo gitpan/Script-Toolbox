@@ -8,12 +8,12 @@ WriteMakefile(
     'NAME'		=> 'Script::Toolbox',
     'VERSION_FROM'	=> 'Util/Util.pm', # finds $VERSION
     'PREREQ_PM'		=> {
-				IO::File     => 1.10,
-				IO::Dir      => 1.04,
+				IO::File     => 1.00,
+				IO::Dir      => 1.00,
 				File::stat   => 1.00,
-				Data::Dumper => 2.121,
-				Fatal        => 1.03,
-				UNIVERSAL    => 1.01,
+				Data::Dumper => 2.00,
+				Fatal        => 1.00,
+				UNIVERSAL    => 1.00,
 			   }, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'Toolbox.pm', # retrieve abstract from module

@@ -75,7 +75,7 @@ like( $x[0], qr/meier/, 'Valid option read.' );
 	print $op->GetOpt('file'). "\n";
 	)
 	);
-like( $x[1], qr/Usage:/, 'Print usage 1.' );
+like( $x[0], qr/Missing mandatory option 'file'./, 'Print usage 1.' );
 
 
 ### Test 12 #####################################################################

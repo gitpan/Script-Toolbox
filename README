@@ -1,3 +1,10 @@
+Script::Toolbox version 0.10
+============================
+This version fixes some minor bugs in the 'Usage' message part.
+Optionaly options and mandatory options with a default value will
+be displayed yet like '[-option <value>] - the description'.
+
+
 Script::Toolbox version 0.09
 ============================
 
