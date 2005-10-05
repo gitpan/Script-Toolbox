@@ -25,7 +25,7 @@ sub mkTST(@)
 
 
 use Test::More;
-BEGIN { plan tests => 2 };
+BEGIN { plan tests => 6 };
 use Script::Toolbox qw(:all);
 
 #########################
@@ -33,3 +33,13 @@ use Script::Toolbox qw(:all);
 ($rc,$x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new(); Exit( 2, "test" );) );
 is( $rc, 2, 'Exit' );
 like( $x[0], qr/\d{4}:\s+test/, 'Exit' );
+
+($rc,$x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new(); ), '-help');
+is( $rc, 1, '-help' );
+like( $x[0], qr/No documentation found for/, 'Help' );
+
+my $line = sprintf "%s\__END__\n=head Name\ntest\n\n=cut\n", q(use Script::Toolbox qw(:all); Script::Toolbox->new(););
+#($rc,$x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new(); =head Name ), '-help');
+($rc,$x) = mkTST( $line, '-help');
+is( $rc, 1, '-help' );
+like( $x[0], qr/User Contributed Perl Documentation/, 'Help' );

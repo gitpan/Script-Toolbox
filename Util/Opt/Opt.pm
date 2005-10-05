@@ -3,6 +3,7 @@ package Script::Toolbox::Util::Opt;
 use strict;
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Getopt::Long;
+use IO::File;
 
 require Exporter;
 
@@ -27,15 +28,18 @@ sub new
 	my $classname = shift;
 	my $optDef	  = shift; # options definition
 	my $caller	  = shift; # may be omited
-	return	undef	if( !defined $optDef );
-	return	undef	if( ref $optDef ne 'HASH' );
-	return	undef	if( scalar keys %{$optDef} == 0  );
+
+	$optDef = {}	if( !defined $optDef );
+	$optDef = {}	if( ref $optDef ne 'HASH' );
+	$optDef = {}	if( scalar keys %{$optDef} == 0  );
+	_addDefaultOptions( \$optDef );
 	return	undef	if( _invalidOptDef( $optDef ));
 	my $self = {};
 	bless( $self, $classname );
 	$self->_instCaller($caller);
 
-	$self->_init( $optDef, @_ );
+	my $rc = $self->_init( $optDef, @_ );
+	exit $rc if( $rc != 0 );
 
 	return $self;
 }
@@ -79,12 +83,11 @@ sub _init()
 
 	$self->{'opsDef'} 	= _normalize($ops);
 	$self->{'addUsage'}	= defined $addUsage ? $addUsage :''; # additional usage text
-	$self->_addDefaultOptions();
-	$self->_processCmdLine();
+	return $self->_processCmdLine();
 }
 
 #------------------------------------------------------------------------------
-# Used for combatibility with old $ops format (array).
+# Used for compatibility with old $ops format (array).
 #------------------------------------------------------------------------------
 sub _normalize($)
 {
@@ -114,11 +117,11 @@ sub _normalize($)
 #------------------------------------------------------------------------------
 sub _addDefaultOptions
 {
-	my ($self) = @_;
+	my ($optDef) = @_;
 
-	if( ! defined $self->{'opsDef'}{'help'} )
+	if( ! defined $$optDef->{'help'} )
 	{
-		$self->{'opsDef'}{'help'} = { 'desc' => 'Print online docu.' };
+		$$optDef->{help} = {desc=>'Print online docu.'};
 	}
 }
 
@@ -157,18 +160,27 @@ sub _processCmdLine($)
 
 	my $rc = GetOptions( $self, (@opt) );
 	$self->usage(), exit 1  if( ! $rc );
-	$self->_checkOps();
+
+    $rc = $self->_checkOps();
+	return $rc;
 }
 
 #------------------------------------------------------------------------------
-# Print usage message if missing any mandatory options and exit.
+# Print usage message if missing any mandatory option and exit.
 # Call perldoc on main programm if option -help is found.
 # Exit with 2 if a mandatory option is missing.
 #------------------------------------------------------------------------------
 sub _checkOps($)
 {
     my ( $self ) = @_;
-    system( "perldoc $0" ),exit 0 if( defined $self->{'help'} );
+
+	my $rc=0;
+	if( defined $self->{'help'} )
+	{
+		my $fh = new IO::File "perldoc $0 |";
+		while( <$fh> ) { print STDERR $_; }
+		$rc = 1;
+	}
 
     my $errMsg;
     foreach ( keys %{$self->{'opsDef'}} )
@@ -181,8 +193,9 @@ sub _checkOps($)
     {
         print STDERR $errMsg;
         $self->usage();
-        exit 2;
+        $rc = 2;
     }
+	return $rc;
 }
 
 #------------------------------------------------------------------------------
@@ -236,7 +249,7 @@ sub usage($$)
 		my $val = $self->{'opsDef'}{$key};
 		printf STDERR "$form\n", _getOpDesc( $val, $max, $cols );
 	}
-	printf STDERR "%s\n%s\n", '-' x ($cols-1),
+	printf STDERR "%s\n%s\n", '-' x ($cols-3),
 					defined $addMsg ? "$addMsg\n" : "\n";
 }
 

@@ -23,7 +23,7 @@ sub mkTST(@)
 }
 #########################
 
-use Test::More tests => 12;
+use Test::More tests => 11;
 ################################# Test 1 ####################################
 BEGIN { use_ok('Script::Toolbox') };
 
@@ -44,10 +44,6 @@ is( $op->GetOpt('file'), undef, 'No Option def' );
 
 ### Test 6 ####################################################################
 ($rc, $x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new({'xx' => 'yy'});) );
-like( $x->[0], qr/.*Invalid .*invalid./, 'Invalid Option def 1' );
-
-## Test 7 #####################################################################
-($rc, $x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new({});) );
 like( $x->[0], qr/.*Invalid .*invalid./, 'Invalid Option def 1' );
 
 ## Test 8 #####################################################################

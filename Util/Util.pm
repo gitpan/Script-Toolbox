@@ -21,7 +21,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Script::Toolbox::Util ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File ) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -29,7 +29,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.12';
+our $VERSION = '0.15';
 
 # Preloaded methods go here.
 #------------------------------------------------------------------------------
@@ -62,17 +62,17 @@ sub _init($)
     $self->_installSigHandlers();
 
     # install options
-    $self->_installOps( $ops )	if( defined $ops );
+    $self->_installOps( $ops );
     Exit( 1, "Invalid option definition, 'opsDef' => {} invalid." )
-    if( defined $ops && !defined $self->{'ops'});
+      if( defined $ops && !defined $self->{'ops'});
 
     # init log file
     my $logdir = $self->GetOpt('logdir');
     if( defined $logdir )
     {
-	system( "mkdir -p $logdir" );
-	$Script::Toolbox::Util{'_logFH'} = Open( ">> $logdir/$log.log" );
-	$Script::Toolbox::Util{'_logFH'}->autoflush();
+	    system( "mkdir -p $logdir" );
+	    $Script::Toolbox::Util{'_logFH'} = Open( ">> $logdir/$log.log" );
+	    $Script::Toolbox::Util{'_logFH'}->autoflush();
     }
 }
 
@@ -87,13 +87,13 @@ sub _installOps($)
 
     foreach my $key ( keys %{$self->{'ops'}} )
     {
-	if( defined $self->{$key} )
-	{
-	    print STDERR "Script::Toolbox internal error. ";
-	    print STDERR "Can't use command line option $key (internal used)\n";
-	    next;
-	}
-	$self->{$key} = $self->{'ops'}->get($key);
+	    if( defined $self->{$key} )
+	    {
+	        print STDERR "Script::Toolbox internal error. ";
+	        print STDERR "Can't use command line option $key (internal used)\n";
+	        next;
+	    }
+	    $self->{$key} = $self->{'ops'}->get($key);
     }
     return;
 }
@@ -149,7 +149,9 @@ sub Log(@)
 {
     my ($message, $canal, $severity, $logtag) = _getParam(@_);
 
-    my $msg = sprintf "%s: %s: %s\n", $0, scalar localtime(), $message;
+	my $prog =  $0;
+	   $prog =~ s|^.*/||;
+    my $msg  =  sprintf "%s: %s: %s\n", $prog, scalar localtime(), $message;
 
     my $fh;
     my $can = *STDERR;
@@ -346,11 +348,11 @@ sub GetOpt($)
 #------------------------------------------------------------------------------
 sub File(@)
 {
-	my ($filename,$newContent) = _getParam(@_);
+	my ($filename,$newContent,$recSep,$fieldSep) = _getParam(@_);
 
 	my ($fh,@F);
 	if( !defined  $newContent) { return _ReadFile($filename); }
-	else			   { _WriteFile($filename,$newContent); }
+	else { _WriteFile($filename,$newContent,$recSep,$fieldSep); }
 }
 
 #------------------------------------------------------------------------------
@@ -360,32 +362,49 @@ sub File(@)
 #------------------------------------------------------------------------------
 sub _WriteFile($$)
 {
-	my($file,$newContent) =@_;
+	my($file,$newContent,$recSep,$fieldSep) =@_;
 
 	my $fh;
 	if( ref $file eq 'IO::File' )
 	{
 		$fh = $file;
 	}else{
-		$file =~ s/^\s*<+\s*//;	# write mode only 
-		$file = '>>' . $file	if( $file !~ /^\s*>/ );
+		$file =~ s/^\s+//;
+		$file =~ s/^<+//;	# write mode only 
+		$file = '>>' . $file	if( $file !~ /^[|>]/ );
 		$fh = Open( $file ) || return undef;
 	}
 	   if( ref $newContent eq '' ) 	   {print $fh $newContent;}
-	elsif( _simpleArray( $newContent)) {map {print $fh $_;} @{$newContent};}
-	elsif( _simpleHash( $newContent )) { _printSimpleHash($newContent, $fh); }
-	else 				   { print $fh Dumper $newContent; }
+	elsif( _simpleArray( $newContent))
+	     { _printSimpleArray($newContent, $fh, $recSep,$fieldSep)}
+	elsif( _simpleHash( $newContent ))
+	     { _printSimpleHash($newContent, $fh, $recSep,$fieldSep)}
+	else { print $fh Dumper $newContent; }
 }
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-sub _printSimpleHash($$)
+sub _printSimpleArray($$$)
 {
-    my ($content,$fh) = @_;
+    my ($content,$fh,$recSep) = @_;
+
+    map
+    {
+	my $rs = defined $recSep   ? $recSep   : '';
+    	print $fh "$_$rs";
+    } @{$content};
+}
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+sub _printSimpleHash($$$$)
+{
+    my ($content,$fh,$recSep,$fieldSep) = @_;
     foreach my $key (sort keys %{$content})
     {
-	printf $fh "%s:%s",
-	$key, $content->{$key}; 
+	my $rs = defined $recSep   ? $recSep   : '';
+	my $fs = defined $fieldSep ? $fieldSep : ':';
+	printf $fh "%s%s%s%s", $key, $fs, $content->{$key},$rs; 
     }
     return;
 }
@@ -523,6 +542,32 @@ sub _getParam(@)
 	shift @_ if( $_[0]->isa("Script::Toolbox::Util" ));
     }
     return @_;
+}
+
+#------------------------------------------------------------------------------
+# Start a shell command with logging.
+# Return 0 if shell command failed otherwise 1.
+#------------------------------------------------------------------------------
+sub System($)
+{
+    my( $cmd ) = @_;
+
+    my $fh = new IO::File;
+    my $pid = $fh->open("$cmd ". '2>&1; echo __RC__$? |' );
+
+    my $rc;
+    while( <$fh> )
+    {
+        chomp;
+        $rc = $_, next  if( /^__RC__/ );
+		next			if( /^\s*$/ );
+        Log( " $_" );
+    }
+
+    $rc =~ s/__RC__//;
+
+    return 1 if( $rc == 0 );
+    return 0;
 }
 
 1;

@@ -16,7 +16,7 @@ our @ISA = qw(Script::Toolbox::Util Script::Toolbox::Util::Opt Exporter);
 # This allows declaration	use Script::Toolbox ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File ) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -24,7 +24,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.12';
+our $VERSION = '0.15';
 
 
 # Preloaded methods go here.
@@ -40,7 +40,7 @@ Script::Toolbox - Framework for the daily business scripts
 
   use Script::Toolbox qw(:all);
   or
-  use Script::Toolbox qw(Log Exit Usage Table Open Dir File)
+  use Script::Toolbox qw(Open Log Exit Table Usage Dir File System)
 
   $e = Script::Toolbox->new();
   # 
@@ -108,11 +108,15 @@ Script::Toolbox - Framework for the daily business scripts
   # File handling
   #
   $arrRef = File('path/to/file'); # read file into array
+  $arrRef = File("/bin/ps |"); # read comand STDOUT into array
 
   File( "> path/to/file", 'override the old content' );
   File( "path/to/file", 'append this to the file' );
   File( "path/to/file", $arrRef ); # append array elements 
-  File( "path/to/file", $hashRef); # append as key:value lines
+  File( "path/to/file", $arrRef, $recSep ); # append array elements 
+  File( "path/to/file", $hashRef, $recSep, $fieldSep); # append as key <$fldSep> value lines
+  File( "| /bin/cat", "Hello world.\n" );
+
 
   $fileHandle = TmpFile(); # open new temporary file
   $arrRef = TmpFile($fileHandle) # read temp whole file
@@ -127,7 +131,11 @@ Script::Toolbox - Framework for the daily business scripts
   $fh = Open( "> /tmp/xx" ); # return an IO::File object with
                              # /tmp/xx opened for write 
                              # die with logfile entry if failed
-
+  $fh = Open( "/bin/ps |" ); # return an IO::File object
+                             # die with logfile entry if failed
+  my $rc = System("/bin/ls") # execute a system command and
+                             # report it's output into the 
+                             # logfile.
 =head1 ABSTRACT
 
   This module should be a "swiss army knife" for the daily tasks.
@@ -186,15 +194,56 @@ is the order of the sorted keys of the hash in the first array element.
 =back
 
 
-=item File('/path/to/file');
+=item $arrRef = File('/path/to/file')
 
 This function read the file content into an array.
 Return a reference to this array or undef if file is not readable.
 
-=item Dir('/path/to/dir');
+=item File( "> path/to/file", 'override the old content' )
 
-This function list the directory into an array (without . and ..).
+Write the string to the file. Overwrite the old content of the file.
+
+=item File( "path/to/file", 'append this to the file' )
+
+Append the string to the file.
+
+
+=item File( "path/to/file", $arrRef )
+
+Append each array element to the end of the file as is (no automatic newline).
+
+
+=item File( "path/to/file", $arrRef, $recSep )
+
+Concatenate each array element with the record separator and append it to the file. 
+
+
+=item File( "path/to/file", $hashRef, $recSep, $fieldSep )
+
+Append records like  KEY$fieldSepVALUE$recSep to the file. Default record separator is 
+the empty string. Default field separator is ":";
+
+=item Dir('/path/to/dir')
+
+This function lists the directory entries into an array (without '.' and '..').
 Return a reference to this array or undef if directory not readable.
+
+=item Dir('/path/to/dir', 'regexp')
+
+This function lists the directory entries matching regexp into an array (without '.' and '..').
+Return a reference to this array or undef if directory not readable.
+
+=item Dir('/path/to/dir', '!regexp')
+
+This function lists the directory entries into an array.
+Skip '.'  '..' and any entry matching regexp.
+Return a reference to this array or undef if directory not readable.
+
+=item  System( 'command to execute' )
+
+Execute a program in a new shell. The STDOUT / STDERR of the executed 
+program will be logged into the logfile. System() returns 0 if the 
+exit code of the program is not 0 otherwise 1;
 
 =head1 SIGNALS
 
@@ -205,7 +254,7 @@ by Script::Toolbox and logged as "program aborted by signal SIG$sig."
 
 =head1 EXPORT
 
-None by default. Can export Open,Log,Exit,Table,Usage,Dir or :all.
+None by default. Can export Open,Log,Exit,Table,Usage,Dir,System or :all.
 
 
 =head1 SEE ALSO

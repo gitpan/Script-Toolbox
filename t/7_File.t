@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl 1.t'
 
 
-use Test::More tests => 23;
+use Test::More tests => 25;
 BEGIN { use_ok('Script::Toolbox', qw(:all)) };
 
 #########################
@@ -60,5 +60,14 @@ $f = $F->TmpFile();
 print $f "Hello\n";
 $r = $F->TmpFile($f);
 ok( $r->[0] eq "Hello\n" ); #23
+
+$f = $F->File("ps | grep perl |");
+like( $f->[0], qr/perl/, 'Read commad output' ); #24
+
+
+File("| /bin/cat >/tmp/__xx__", "Hello world." );
+$f = File("/tmp/__xx__");
+ok( $f->[0] eq "Hello world." ); #25
+unlink "/tmp/__xx__";
 
 unlink "/tmp/7_File.log";

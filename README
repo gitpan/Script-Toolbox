@@ -1,3 +1,10 @@
+Script::Toolbox version 0.13...0.15
+===================================
+- automatic usage message if any errors on the command line
+- Script::Toolbox->new() is valid yet (no command line processing)
+- new function System()
+- new function File( "| /bin/cat", "Hello World" )
+
 Script::Toolbox version 0.12
 ============================
 0.12 fixes a little mistake in the POD section of Script::Toolbox 
