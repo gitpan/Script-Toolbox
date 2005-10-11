@@ -16,4 +16,5 @@ t/5_GetSet.t
 t/6_Table.t
 t/7_File.t
 t/8_Dir.t
+t/9_Misc.t
 META.yml                                 Module meta-data (added by MakeMaker)
