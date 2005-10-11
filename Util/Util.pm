@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 # Preloaded methods go here.
 #------------------------------------------------------------------------------
@@ -524,12 +524,14 @@ sub Usage($$)
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-sub SetOpt($)
+sub SetOpt($$$)
 {
 	my ($self,$opt,$value) = @_;
 	return	undef unless defined $self->{'ops'};
 	return	undef unless ref($self->{'ops'}) eq 'Script::Toolbox::Util::Opt';
-	return	$self->{'ops'}->set($opt,$value);
+	my $old = $self->{'ops'}->set($opt,$value);
+	$self->{$opt} = $value;
+	return $old;
 }
 
 #------------------------------------------------------------------------------

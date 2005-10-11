@@ -1,3 +1,8 @@
+Script::Toolbox version 0.18
+============================
+- bugfix in SetOpt()
+
+
 Script::Toolbox version 0.17
 ============================
 - same as 0.16 with additional tests
