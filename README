@@ -1,3 +1,8 @@
+Script::Toolbox version 0.16
+============================
+- new function Now()
+- new function Now('strftime-format')
+
 Script::Toolbox version 0.13...0.15
 ===================================
 - automatic usage message if any errors on the command line

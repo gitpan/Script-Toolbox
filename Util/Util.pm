@@ -9,6 +9,7 @@ use IO::Dir;
 use File::stat;
 use Data::Dumper;
 use Fatal qw(open close);
+use POSIX qw(strftime);
 
 require Exporter;
 
@@ -21,7 +22,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Script::Toolbox::Util ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System ) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -29,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 # Preloaded methods go here.
 #------------------------------------------------------------------------------
@@ -539,7 +540,7 @@ sub _getParam(@)
     my $x = ref $_[0];
     if( $x =~ /Script::Toolbox/  )
     {
-	shift @_ if( $_[0]->isa("Script::Toolbox::Util" ));
+	    shift @_ if( $_[0]->isa("Script::Toolbox::Util" ));
     }
     return @_;
 }
@@ -550,7 +551,7 @@ sub _getParam(@)
 #------------------------------------------------------------------------------
 sub System($)
 {
-    my( $cmd ) = @_;
+    my( $cmd ) = _getParam(@_);
 
     my $fh = new IO::File;
     my $pid = $fh->open("$cmd ". '2>&1; echo __RC__$? |' );
@@ -569,6 +570,32 @@ sub System($)
     return 1 if( $rc == 0 );
     return 0;
 }
+
+#------------------------------------------------------------------------------
+# Return the actual date and time. If $format is undef the result is a hash
+# ref with keys sec,min,hour,mday,mon,year,wday,yday,isdst. Mon and year are 
+# corrected.
+# If $format is not undef it must be a strftime() format string. The result
+# of Now() is then the strftime() formated string.
+#------------------------------------------------------------------------------
+sub Now(@)
+{
+    my( $format ) = _getParam(@_);
+
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+
+	if( !defined $format )
+	{
+		$mon++;
+		$year+=1900;
+		return {sec=>$sec,min=>$min,hour=>$hour,
+			    mday=>$mday,mon=>$mon,year=>$year,
+				wday=>$wday,yday=>$yday,isdst=>$isdst};
+	}
+
+	return strftime $format, $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst;
+}
+
 
 1;
 __END__

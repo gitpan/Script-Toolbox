@@ -16,7 +16,7 @@ our @ISA = qw(Script::Toolbox::Util Script::Toolbox::Util::Opt Exporter);
 # This allows declaration	use Script::Toolbox ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System ) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -24,7 +24,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 
 # Preloaded methods go here.
@@ -133,9 +133,21 @@ Script::Toolbox - Framework for the daily business scripts
                              # die with logfile entry if failed
   $fh = Open( "/bin/ps |" ); # return an IO::File object
                              # die with logfile entry if failed
-  my $rc = System("/bin/ls") # execute a system command and
+  $rc = System("/bin/ls")    # execute a system command and
                              # report it's output into the 
                              # logfile.
+  $now = Now();
+         printf "Day:%d Mon:%d Year:%d Wday:%d Yday:%d IsDST:%d Sec:%d Min:%d Hour:%d",
+	            $now->{mday},
+				$now->{mon},
+				$now->{year},
+				$now->{wday},
+				$now->{yday},
+				$now->{isdst},
+				$now->{sec},
+				$now->{min},
+				$now->{hour};
+  $now = Now('"%A, %B %d, %Y"'); # Monday, October 10, 2005
 =head1 ABSTRACT
 
   This module should be a "swiss army knife" for the daily tasks.
