@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl 1.t'
 
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 BEGIN { use_ok('Script::Toolbox') };
 
 #########################
@@ -17,7 +17,7 @@ $F = Script::Toolbox->new();
 ############################### TEST 2 #####################################
 
 $n = $F->Now();
-$nn= $F->Now('%Y%m%d%H%M');
+$nn= $F->Now({format=>'%Y%m%d%H%M'});
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 ok( $n->{sec}   == $sec );      #2
 ok( $n->{min}   == $min );      #3
@@ -32,3 +32,10 @@ ok( $n->{isdst} == $isdst);     #10
 $str = sprintf "%.4d%.2d%.2d%.2d%.2d", $year+1900,$mon+1,$mday,$hour,$min;
 ok( $nn eq $str); #11
 
+$n = $F->Now({offset=>60});
+$nn= $F->Now({format=>'%Y%m%d%H%M', offset=>60});
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+ok( $n->{min}   == $min+1 );      #12
+
+$str = sprintf "%.4d%.2d%.2d%.2d%.2d", $year+1900,$mon+1,$mday,$hour,$min+1;
+ok( $nn eq $str); #13

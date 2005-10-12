@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 # Preloaded methods go here.
 #------------------------------------------------------------------------------
@@ -575,27 +575,28 @@ sub System($)
 
 #------------------------------------------------------------------------------
 # Return the actual date and time. If $format is undef the result is a hash
-# ref with keys sec,min,hour,mday,mon,year,wday,yday,isdst. Mon and year are 
-# corrected.
+# ref with keys sec,min,hour,mday,mon,year,wday,yday,isdst,epoch.
+# Mon and year are corrected. Epoch is the time in seconds since 1.1.1970.
 # If $format is not undef it must be a strftime() format string. The result
 # of Now() is then the strftime() formated string.
+# $opt may be {format=><'strftime-format'>, offset=><+-seconds>} 
 #------------------------------------------------------------------------------
 sub Now(@)
 {
-    my( $format ) = _getParam(@_);
+    my( $opt ) = _getParam(@_);
 
-	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+	my $offset = defined $opt->{offset} ? $opt->{offset} : 0;
+	my $epoch  = time+$offset;
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($epoch);
 
-	if( !defined $format )
-	{
-		$mon++;
-		$year+=1900;
-		return {sec=>$sec,min=>$min,hour=>$hour,
-			    mday=>$mday,mon=>$mon,year=>$year,
-				wday=>$wday,yday=>$yday,isdst=>$isdst};
-	}
+	return strftime $opt->{format},
+		   $sec,$min,$hour,$mday,$mon, $year,$wday,$yday,$isdst
+		   if( defined $opt->{format} );
 
-	return strftime $format, $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst;
+	$mon++;
+	$year+=1900;
+	return {sec=>$sec,min=>$min,hour=>$hour, mday=>$mday,mon=>$mon,year=>$year,
+				wday=>$wday,yday=>$yday,isdst=>$isdst,epoch=>$epoch};
 }
 
 

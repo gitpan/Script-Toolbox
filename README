@@ -1,3 +1,7 @@
+Script::Toolbox version 0.19
+============================
+- Now() can handle offsets now
+
 Script::Toolbox version 0.18
 ============================
 - bugfix in SetOpt()
