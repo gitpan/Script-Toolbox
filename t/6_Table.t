@@ -11,6 +11,21 @@ sub printM($$$)
 	map { print FH "$_\n"; } @{$r};
 }
 
+sub my_eq_array($$)
+{
+    my( $x, $y ) = @_;
+
+    my $c1 = scalar @{$x};
+    my $c2 = scalar @{$y};
+    return 0 if ( $c1 != $c2 );
+
+    for ( my $i=0; $i < $c1; $i++ )
+    {
+        return 0 if( $x->[$i] ne  $y->[$i] );
+    }
+    return 1;
+}
+
 #########################
 #########################
 
@@ -43,7 +58,7 @@ $ref = ["== Test2 ==",
 		"11111 2222222 3    ",
 		];
 printM($ref, $r, 'AA');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 ############################### TEST 3 #####################################
 $rep2 = {
@@ -63,7 +78,7 @@ $ref = ["== Test3 ==",
 		"dddd eee f ",
 		];
 printM($ref, $r, 'BB');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 
 
@@ -85,7 +100,7 @@ $ref = ["== Test4 ==",
 		"11:11        222.000 3.33333333333333e+15",
 		];
 printM($ref, $r, 'DD');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 ############################### TEST 5/6 #####################################
 $rep5 = {
@@ -117,7 +132,7 @@ $ref = ["== Title ==",
 		"11:11        222.000 3.33333333333333e+15"
 	   ];
 printM($ref, $r, 'FF');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 
 ############################### TEST 8 #####################################
@@ -138,7 +153,7 @@ $ref = ["== This is the title ==",
 		"11:11        222.000 3.33333333333333e+15"
 	   ];
 printM($ref, $r, 'GG');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 
 
@@ -154,7 +169,7 @@ $ref = [
 		"  777   888   999"
 	   ];
 printM($ref, $r, 'HH');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 
 
@@ -171,7 +186,7 @@ $ref = [
 		"  777   888   999"
 	   ];
 printM($ref, $r, 'II');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 
 ############################### TEST 11 #####################################
@@ -187,7 +202,7 @@ $ref = [
 		"    7.77     8.88     9.99"
 	   ];
 printM($ref, $r, 'JJ');
-ok(eq_array($ref, $r));
+ok(my_eq_array($ref, $r));
 
 
 

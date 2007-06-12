@@ -16,7 +16,7 @@ our @ISA = qw(Script::Toolbox::Util Script::Toolbox::Util::Opt Exporter);
 # This allows declaration	use Script::Toolbox ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -24,7 +24,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 
 # Preloaded methods go here.
@@ -148,6 +148,36 @@ Script::Toolbox - Framework for the daily business scripts
 				$now->{min},
 				$now->{hour};
   $now = Now('"%A, %B %d, %Y"'); # Monday, October 10, 2005
+
+  #
+  # Menue handling
+  #
+
+  # using Menue to start subroutines
+  my $mainMenue = [{label=>'EXIT', jump=>\&_exit, argv=>0},
+                   {label=>'Edit/Copy Hosts', jump=>\&editHosts, argv=>$ops},
+                   {label=>'Activate Host', jump=>\&activate, argv=>$ops},
+                  ];
+  while(( 1 ) { my ($o,$mainMenue) = Menue($mainMenue); }
+
+  # using Menue to display and edit some few data values
+  my $dataMene = [{label=>'EXIT'},
+                  {label=>'Name',value=>''},
+                  {label=>'ZIP', value=>'01468'},
+                  {label=>'City',value=>'Templeton'}
+                 ];
+
+  while( 1 ) { my ($o,$dataMenue) = Menue($dataMenue);
+               last if( $o == 0 ); }
+                
+  # this is the output:
+  #0 EXIT
+  #1 Name  []
+  #2 ZIP   [01468]
+  #3 City  [Templeton]
+  #
+  #Select: 
+
 =head1 ABSTRACT
 
   This module should be a "swiss army knife" for the daily tasks.

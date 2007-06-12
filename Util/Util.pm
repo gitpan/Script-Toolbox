@@ -22,7 +22,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Script::Toolbox::Util ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 # Preloaded methods go here.
 #------------------------------------------------------------------------------
@@ -477,6 +477,8 @@ sub TmpFile(@)
 
 #------------------------------------------------------------------------------
 # Return the filenames of a directory as array reference.
+# Skip '.','..' and all filenames not matching search pattern if a search
+# pattern is defined.
 #------------------------------------------------------------------------------
 sub Dir(@)
 {
@@ -599,6 +601,138 @@ sub Now(@)
 				wday=>$wday,yday=>$yday,isdst=>$isdst,epoch=>$epoch};
 }
 
+#------------------------------------------------------------------------------
+# Display a menue, return the selected index number and the menue data structure.
+# If a VALUE or DEFAULT keys of a menue option points to a value this value can
+# be changed.
+# If a jump target is defined, the corresponding function will be called with
+# argv=> as arguments.
+# Data structure: [{label=>,value=>,jump=>,argv=>},...]
+# - label=> must be defined all other keys are optinal
+# - jump=> must point to a subroutine if set
+# - argv=> arguments for the subroutine jump points to
+# 
+#------------------------------------------------------------------------------
+sub Menue($)
+{
+    my ($opts) = @_;
+
+    my ($i,$o) = (0,0);
+    my $maxLen = _maxLabelLength($opts);
+    my $form1 = "%3d %-${maxLen}s ";
+    system("clear");
+    ($i,$o) = (0,0);
+    foreach my $op ( @{$opts} )
+    {
+        my ($def,$form)=_getDefForm($form1,$op);
+        printf $form, $i++,$op->{'label'},$def;
+    }
+    printf "\nSelect: ";
+    $o = _getNumber( $i-1);
+    if( $o < $i && $o > -1 )
+    {
+        _setValue($o, $opts);
+        _jump($o, $opts); # jump to callback if defined
+    }
+    return $o,$opts;
+}
+#------------------------------------------------------------------------------
+# Jump to a callback function of a menue option.
+#------------------------------------------------------------------------------
+sub _jump($$)
+{
+    my ($o,$menue) = @_;
+
+    return if( !defined $menue->[$o]->{'jump'} ); #option has no callback
+
+    my $call = $menue->[$o]->{'jump'};
+    my $args = defined $menue->[$o]->{'argv'} ? $menue->[$o]->{'argv'} : undef;
+
+    $call->($args);
+    return;
+}
+
+#------------------------------------------------------------------------------
+# Compute the maximum length of all labels found in the menu array @{$opts}.
+#------------------------------------------------------------------------------
+sub _maxLabelLength($)
+{
+    my ($opts) = @_;
+    my $len=0;
+    foreach my $op ( @{$opts} )
+    {
+        my $l = length($op->{'label'});
+        $len = $len < $l ? $l : $len;
+    }
+    return $len;
+}
+
+#------------------------------------------------------------------------------
+# Compute the default value and the format string.
+#------------------------------------------------------------------------------
+sub _getDefForm($$)
+{
+    my ($form1,$op) = @_;
+
+    my ($def,$fotm);
+    $def = $op->{'value'}   if( defined $op->{'value'} );
+    my $form = defined $def ? "$form1 [%s]" : $form1;
+
+    return $def,"$form\n";
+}
+#------------------------------------------------------------------------------
+# Read the next number from STDIN. Return 0 if given character is not a digit.
+# Read two characters if max option number is greater than 9. 
+# Valid option numbers are 0...99.
+#------------------------------------------------------------------------------
+sub _getNumber($)
+{
+    my ($maxNum) = @_;
+
+    my $o=_getChar();
+    if( $maxNum > 9 )
+    {
+        my $oo=_getChar();
+        $o=10*$o+$oo if( $oo =~ /^\d$/ );
+    }
+    return 0 if( $o !~ /^\d+$/ );
+    return $o;
+}
+#------------------------------------------------------------------------------
+# Read one character from STDIN. FIXME: stty method is not portable
+#------------------------------------------------------------------------------
+sub _getChar()
+{
+    system "stty", '-icanon', 'eol', "\001";
+    my $key = getc(STDIN);
+    system "stty", 'icanon', 'eol', '^@'; # ASCII null
+    return $key;
+}
+
+#------------------------------------------------------------------------------
+# Read a line from STDIN and assign it to the "value" key of an menue option.
+# Data structure: [{label=>,value=>,jump=>,argv=>},...]
+# After this function value=> has one of the following values:
+# - the read line if not empty
+# - the old value if read an empty line and an old value exists
+#------------------------------------------------------------------------------
+sub _setValue($)
+{
+    my ($o,$opts) = @_;
+
+    return undef if( !defined $opts->[$o]{'value'} );
+
+    my $op  = $opts->[$o];
+    my $def = defined $op->{'value'} ? $op->{'value'} : '';
+
+    printf "\n%s [%s]:", $op->{'label'}, $def;
+    my $resp = <STDIN>;
+    chomp $resp;
+
+    $resp = $def if( $resp eq '' );
+    $op->{'value'} = $resp;
+    return $resp;
+}
 
 1;
 __END__

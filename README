@@ -1,3 +1,9 @@
+Script::Toolbox version 0.20 (2007/06/12)
+=========================================
+- test t/6_Table needs no longer eq_array()
+- new function Menue() (jump controller and data editor/store)
+
+
 Script::Toolbox version 0.19
 ============================
 - Now() can handle offsets now
