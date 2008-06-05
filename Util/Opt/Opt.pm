@@ -167,7 +167,7 @@ sub _processCmdLine($)
 
 #------------------------------------------------------------------------------
 # Print usage message if missing any mandatory option and exit.
-# Call perldoc on main programm if option -help is found.
+# Call perldoc of main programm if option -help is found.
 # Exit with 2 if a mandatory option is missing.
 #------------------------------------------------------------------------------
 sub _checkOps($)
@@ -175,14 +175,21 @@ sub _checkOps($)
     my ( $self ) = @_;
 
 	my $rc=0;
+    my $errMsg;
+
 	if( defined $self->{'help'} )
 	{
-		my $fh = new IO::File "perldoc $0 |";
-		while( <$fh> ) { print STDERR $_; }
-		$rc = 1;
+		my $hasPerldoc = system("which perldoc >/dev/null 2>&1") / 256;
+		if( $hasPerldoc == 0 )
+		{
+			my $fh = new IO::File "perldoc $0 |";
+			while( <$fh> ) { print STDERR $_; }
+			$rc = 1;
+		}else{
+			$errMsg .= "Can't read online manual. Perldoc is not installed.\n";
+		}
 	}
 
-    my $errMsg;
     foreach ( keys %{$self->{'opsDef'}} )
     {
         $errMsg .= "Missing mandatory option '$_'.\n"

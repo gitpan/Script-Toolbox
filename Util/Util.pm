@@ -6,7 +6,6 @@ use Script::Toolbox::Util::Opt;
 use Script::Toolbox::Util::Formatter;
 use IO::File;
 use IO::Dir;
-use File::stat;
 use Data::Dumper;
 use Fatal qw(open close);
 use POSIX qw(strftime);
@@ -22,7 +21,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Script::Toolbox::Util ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue KeyMap Stat) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -30,9 +29,12 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 # Preloaded methods go here.
+sub _getKV(@);
+sub _getCSV(@);
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 sub new
@@ -345,16 +347,156 @@ sub GetOpt($)
 #------------------------------------------------------------------------------
 # Read the entire file into  an array or write the new content to the file.
 # File can be a file name or an IO::File handle.
-# Newcontent can be a SCALAR value, an ARRAY reference or a HASH reference.
+# Newcontent may be a SCALAR value, an ARRAY reference, a HASH reference or
+# a reference to a callback function.
 #------------------------------------------------------------------------------
 sub File(@)
 {
 	my ($filename,$newContent,$recSep,$fieldSep) = _getParam(@_);
 
-	my ($fh,@F);
-	if( !defined  $newContent) { return _ReadFile($filename); }
+	   if( !defined  $newContent) 	 { return _ReadFile($filename); }
+	elsif( ref $newContent eq 'CODE'){ return _ReadFile($filename,$newContent);}
 	else { _WriteFile($filename,$newContent,$recSep,$fieldSep); }
 }
+
+#------------------------------------------------------------------------------
+# Read the entire file into a hash or write the new content to the file.
+# File can be a file name or an IO::File handle.
+# Newcontent may be a reference to a keyMap HASH or a reference to a callback
+# function.
+# The Hash looks like:
+# keyA1 => keyB1 ... =>keyN1 => value1
+# keyA2 => keyB2 ... =>keyN2 => value2
+#------------------------------------------------------------------------------
+sub KeyMap(@)
+{
+	my ($filename,$fieldSep,$newContent) = _getParam(@_);
+
+	   if( !defined  $newContent)
+		 { return _ReadKeyMap($filename, $fieldSep); }
+	elsif( ref $newContent eq 'CODE' )
+		 { return _ReadKeyMap($filename, $fieldSep, $newContent); }
+	else { _WriteKeyMap($filename,$fieldSep,$newContent); }
+}
+
+#------------------------------------------------------------------------------
+# The Hash looks like:
+# keyA1 => keyB1 ... =>keyN1 => value1
+# keyA2 => keyB2 ... =>keyN2 => value2
+#------------------------------------------------------------------------------
+sub _WriteKeyMap($$$)
+{
+	my ($filename,$fieldSep,$newContent) = @_;
+
+	$fieldSep = ','	if( !defined $fieldSep );
+
+	my $TXT = '';
+	_getCSV( \$TXT, '', $newContent, $fieldSep );
+
+	File( "> $filename", $TXT );
+}
+
+#------------------------------------------------------------------------------
+# Write a KeyMap (HASH) to a file.
+#
+# The Hash looks like:
+# keyA1 => keyB1 ... =>keyN1 => value1
+# keyA2 => keyB2 ... =>keyN2 => value2
+#------------------------------------------------------------------------------
+sub _getCSV(@)
+{
+	my ($txt, $prev, $newContent,$fieldSep) = @_;
+
+	my $prefix = '';
+	foreach my $k ( sort keys %{$newContent} )
+	{
+		$$txt .= $prefix .$k . $fieldSep;
+		if( ref $newContent->{$k} ne 'HASH' )
+		{
+			$$txt  .= $newContent->{$k} . "\n";
+			$prefix = $prev;
+			next;
+		}
+		_getCSV($txt, "$prev$k$fieldSep", $newContent->{$k}, $fieldSep);
+	}
+}
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+sub _checkParam($$)
+{
+	my ( $fieldSep, $callBack) = @_;
+
+	my $def=',';
+	$$fieldSep = $def	if( !defined $$fieldSep );
+
+	my ( $fs, $cb ) = ( $$fieldSep, $$callBack);
+	my $rfs = ref $fs; my $rcb = ref $cb; 
+	
+	my $scalar_code	= ref $fs eq '' 	&& ref $cb eq 'CODE';
+	my $scalar_undef= ref $fs eq '' 	&& !defined $cb;
+	my $code_scalar = ref $fs eq 'CODE'	&& ref $cb eq '' && defined $cb;
+	my $code_undef  = ref $fs eq 'CODE'	&& !defined $cb;
+
+	if   ( $scalar_code ){return;}
+	elsif( $scalar_undef){return;}
+	elsif( $code_scalar ){$$fieldSep = $cb; $$callBack = $fs;}
+	elsif( $code_undef  ){$$fieldSep = $def;$$callBack = $fs;}
+	else { $$fieldSep = $def; $$callBack = undef;}
+}
+
+#------------------------------------------------------------------------------
+# Read a CSV file into a hash. The lines of the CSV files are "\n" separated.
+# Default field separator is ",".
+# The Hash looks like:
+# keyA1 => keyB1 ... =>keyN1 => value1
+# keyA2 => keyB2 ... =>keyN2 => value2
+#------------------------------------------------------------------------------
+sub _ReadKeyMap($$$)
+{
+	my ($file, $fieldSep, $callBack) = @_;
+	
+	_checkParam(\$fieldSep, \$callBack);	
+
+	my $f;
+	if( defined $callBack ) { $f = File( $file,$callBack, $fieldSep ); }
+	else					{ $f = File( $file ); }
+	chomp( @{$f} );
+
+	my %P;
+	foreach my $line ( @{$f} )
+	{
+		my @L = split /$fieldSep/, $line;
+		_getKV( \%P, @L );       
+	}
+	return \%P;
+}
+
+#------------------------------------------------------------------------------
+# Add one line (from @_ array) to the hash. Hash looks like:
+# key1 => key2 ... =>keyN => value1
+# key1 => key2 ... =>keyX => value2
+#------------------------------------------------------------------------------
+sub _getKV(@)
+{
+	my ($P, $k, @v) = @_;
+        
+	return  if( ! defined $k );
+	if( ref $P->{$k} eq 'HASH' ){
+		_getKV( $P->{$k}, @v );
+		return;
+	}
+	if( @v == 1 ){
+		$P->{$k} = $v[0];
+		return;
+	}else{
+		my $x = {};
+		$P->{$k} = $x;
+		_getKV( $x, @v );
+	}
+}
+
 
 #------------------------------------------------------------------------------
 # Open the file in required write mode (default append mode) and write the new
@@ -443,20 +585,22 @@ sub _simpleArray($)
 # Return undef if the file isn't readable.
 # File can be a file name or an IO::File handle.
 #------------------------------------------------------------------------------
-sub _ReadFile($)
+sub _ReadFile($$)
 {
-	my($file) =@_;
+	my($file,$callBack) =@_;
 
 	my ($fh,@F);
 	if( ref $file  eq 'IO::File' )
 	{
-	$fh = $file;
+	    $fh = $file;
 	}else{
-	$file =~ s/^\s*>+\s*//; # read only mode
-	$fh= Open( $file )  || return undef;
+	    $file =~ s/^\s*>+\s*//; # read only mode
+	    $fh= Open( $file )  || return undef;
 	}
-	@F = <$fh>;
-	return \@F;
+	@F  = <$fh>; my $rf = \@F;
+	$rf = &{$callBack}( \@F )	if( defined $callBack );
+	$rf = \@F					if(!defined $rf );
+	return $rf;
 }
 
 #------------------------------------------------------------------------------
@@ -587,7 +731,7 @@ sub Now(@)
 {
     my( $opt ) = _getParam(@_);
 
-	my $offset = defined $opt->{offset} ? $opt->{offset} : 0;
+	my $offset = defined $opt->{offset} ? $opt->{offset}+0 : 0;
 	my $epoch  = time+$offset;
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($epoch);
 
@@ -603,7 +747,7 @@ sub Now(@)
 
 #------------------------------------------------------------------------------
 # Display a menue, return the selected index number and the menue data structure.
-# If a VALUE or DEFAULT keys of a menue option points to a value this value can
+# If a VALUE or DEFAULT key of a menue option points to a value this value can
 # be changed.
 # If a jump target is defined, the corresponding function will be called with
 # argv=> as arguments.
@@ -636,6 +780,55 @@ sub Menue($)
     }
     return $o,$opts;
 }
+
+#------------------------------------------------------------------------------
+#  Read a directory and return a hash with filenames stat() structure infos
+#  for every file. An optional pattern (regexp) may be used for selecting files.
+#------------------------------------------------------------------------------
+sub Stat($$)
+{
+    my ($path,$patt) = _getParam( @_ );
+
+    my $dir = Dir($path,$patt);
+
+    my $stat;
+    foreach my $f ( @{$dir} )
+    {
+        my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+            $atime,$mtime,$ctime,$blksize,$blocks) = stat("$path/$f");
+#        $stat->{$f}{'dev'}  = $dev;
+#        $stat->{$f}{'ino'}  = $ino;
+#        $stat->{$f}{'mode'} = $mode;
+#        $stat->{$f}{'nlink'}= $nlink;
+#        $stat->{$f}{'uid'}  = $uid;
+#        $stat->{$f}{'gid'}  = $gid;
+#        $stat->{$f}{'rdev'} = $rdev;
+#        $stat->{$f}{'size'} = $size;
+#        $stat->{$f}{'atime'}= $atime;
+#        $stat->{$f}{'mtime'}= $mtime;
+#        $stat->{$f}{'ctime'}= $ctime;
+#        $stat->{$f}{'blksize'}  = $blksize;
+#        $stat->{$f}{'blocks'}   = $blocks;
+
+		(
+        $stat->{$f}{'dev'}  ,
+        $stat->{$f}{'ino'}  ,
+        $stat->{$f}{'mode'} ,
+        $stat->{$f}{'nlink'},
+        $stat->{$f}{'uid'}  ,
+        $stat->{$f}{'gid'}  ,
+        $stat->{$f}{'rdev'} ,
+        $stat->{$f}{'size'} ,
+        $stat->{$f}{'atime'},
+        $stat->{$f}{'mtime'},
+        $stat->{$f}{'ctime'},
+        $stat->{$f}{'blksize'} ,
+        $stat->{$f}{'blocks'}  
+		) = stat("$path/$f");
+    }
+    return $stat;
+}
+
 #------------------------------------------------------------------------------
 # Jump to a callback function of a menue option.
 #------------------------------------------------------------------------------
@@ -742,3 +935,5 @@ __END__
 Script::Toolbox::Util - see documentaion of Script::Toolbox
 
 =cut
+
+# vim: ts=4 sw=4 ai

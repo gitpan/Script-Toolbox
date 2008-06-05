@@ -8,13 +8,14 @@ Util/Makefile.PL
 Util/Opt/Makefile.PL
 Util/Opt/Opt.pm
 Util/Util.pm
-t/1_new.t
-t/2_Log.t
-t/3_Exit.t
-t/4_Open.t
-t/5_GetSet.t
-t/6_Table.t
-t/7_File.t
-t/8_Dir.t
-t/9_Misc.t
+t/01_new.t
+t/02_Log.t
+t/03_Exit.t
+t/04_Open.t
+t/05_GetSet.t
+t/06_Table.t
+t/07_File.t
+t/08_Dir.t
+t/09_Misc.t
+t/10_Stat.t
 META.yml                                 Module meta-data (added by MakeMaker)

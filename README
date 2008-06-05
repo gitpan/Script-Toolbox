@@ -1,3 +1,9 @@
+Script::Toolbox version 0.21 (2008/05/31)
+=========================================
+- new function KeyMap()- read/write key=>key=>value structures from/to CSV files
+- new function Stat()  - like Dir() but with stat() info for each file
+- File() has been enhanced to start a callback during read phase
+
 Script::Toolbox version 0.20 (2007/06/12)
 =========================================
 - test t/6_Table needs no longer eq_array()
