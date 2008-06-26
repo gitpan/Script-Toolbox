@@ -29,7 +29,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -720,12 +720,30 @@ sub System($)
 }
 
 #------------------------------------------------------------------------------
+# Compute the difference between NOW[+offset] and the time value given as 
+# second parameter. Return a hash reference holding the difference in seconds,
+# minutes, hours and days. Every value as a floating point number.
+#------------------------------------------------------------------------------
+sub _nowDiff($$)
+{
+	my ($now,$rtime) = @_;
+
+	my %R;
+	$R{seconds}= $now - $rtime;
+	$R{minutes}= $R{seconds} / 60.0;
+	$R{hours}  = $R{seconds} / 3600.0;
+	$R{days}   = $R{seconds} / 86400.0;
+	return \%R;
+}
+
+
+#------------------------------------------------------------------------------
 # Return the actual date and time. If $format is undef the result is a hash
 # ref with keys sec,min,hour,mday,mon,year,wday,yday,isdst,epoch.
 # Mon and year are corrected. Epoch is the time in seconds since 1.1.1970.
 # If $format is not undef it must be a strftime() format string. The result
 # of Now() is then the strftime() formated string.
-# $opt may be {format=><'strftime-format'>, offset=><+-seconds>} 
+# $opt may be {format=><'strftime-format'>, offset=><+-seconds>, diff=><time>} 
 #------------------------------------------------------------------------------
 sub Now(@)
 {
@@ -733,6 +751,9 @@ sub Now(@)
 
 	my $offset = defined $opt->{offset} ? $opt->{offset}+0 : 0;
 	my $epoch  = time+$offset;
+
+	return _nowDiff( $epoch, $opt->{diff} ) if( $opt->{diff} );
+
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($epoch);
 
 	return strftime $opt->{format},

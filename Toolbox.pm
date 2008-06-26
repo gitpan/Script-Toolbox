@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 
 # Preloaded methods go here.
@@ -170,6 +170,7 @@ Script::Toolbox - Framework for the daily business scripts
   print $now->{epoch};
   $now = Now({format=>"%A, %B %d, %Y"}); # Monday, October 10, 2005
   $now = Now({offset=>3600});            # now + 1 hour
+  $diff= Now({diff=>1214510269}); # difference to 2008-06-26 21:57:49
 
   #----------------
   # Menue handling
@@ -346,14 +347,17 @@ of the perl script using Script::Toolbox.pm;
 
 
 
-=item Now({format=><'strftime-format'>, offset=><+-seconds>})
+=item Now({format=><'strftime-format'>, offset=><+-seconds>, diff=><time>})
 
 Return the actual date and time. If $format is undef the result is a hash
 ref. The keys are: I<sec min hour mday mon year wday yday isdst epoch.> 
 Month and year are corrected. Epoch is the time in seconds since 1.1.1970.
 If $format is not undef it must be a strftime() format string. The result
 of Now() is then the strftime() formated string. If defined, offset will be 
-added to the epoch seconds before any format converting takes place. 
+added to the epoch seconds before any format converting takes place. If $diff 
+is set it must be a value in epoch seconds. In that case Now() returns a hash 
+ref with keys I<seconds minutes hours days>. Each corresponding value is the 
+difference between now and the given time value.
 
 
 

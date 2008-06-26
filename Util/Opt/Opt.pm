@@ -179,14 +179,15 @@ sub _checkOps($)
 
 	if( defined $self->{'help'} )
 	{
-		my $hasPerldoc = system("which perldoc >/dev/null 2>&1") / 256;
-		if( $hasPerldoc == 0 )
+		my $hasPerldoc = system("type perldoc >/dev/null 2>&1") / 256;
+		my $hasNroff   = system("type nroff   >/dev/null 2>&1") / 256;
+		if( $hasPerldoc == 0 && $hasNroff == 0 )
 		{
 			my $fh = new IO::File "perldoc $0 |";
 			while( <$fh> ) { print STDERR $_; }
 			$rc = 1;
 		}else{
-			$errMsg .= "Can't read online manual. Perldoc is not installed.\n";
+			$errMsg .= "Can't display online manual. Missing nroff and/or perldoc.\n";
 		}
 	}
 

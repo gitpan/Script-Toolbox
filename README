@@ -1,3 +1,8 @@
+Script::Toolbox version 0.22 (2008/06/26)
+=========================================
+- new parameter Now({diff=><time>})
+- bug fixing in test t03_Exit
+
 Script::Toolbox version 0.21 (2008/05/31)
 =========================================
 - new function KeyMap()- read/write key=>key=>value structures from/to CSV files

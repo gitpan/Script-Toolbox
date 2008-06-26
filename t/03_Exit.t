@@ -26,7 +26,7 @@ system("cp /tmp/_tst_.log /tmp/_tst_.log.$$");
 
 
 use Test::More;
-BEGIN { plan tests => 6 };
+BEGIN { plan tests => 10 };
 use Script::Toolbox qw(:all);
 
 #########################
@@ -35,26 +35,31 @@ use Script::Toolbox qw(:all);
 is( $rc, 2, 'Exit' );
 like( $x[0], qr/\d{4}:\s+test/, 'Exit' );
 
-if( system("which perldoc >/dev/null 2>&1") / 256 == 0 )
-{
-	# following tests should cause an error
-	($rc,$x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new(); ), '-help');
-	is( $rc, 1, '-help' );
-	like( $x[0], qr/Perldoc is not installed/, 'Help' );
+my $nroff  = !(system("type nroff   >/dev/null 2>&1") / 256);
+my $perldoc= !(system("type perldoc >/dev/null 2>&1") / 256);
+SKIP: {
+	skip "nroff or perldoc is not installed.", 4 if ( !($nroff && $perldoc) );
 
-	my $line = sprintf "%s\__END__\n=head Name\ntest\n\n=cut\n", q(use Script::Toolbox qw(:all); Script::Toolbox->new(););
-	($rc,$x) = mkTST( $line, '-help');
-	is( $rc, 1, '-help' );
-	like( $x[0], qr/Perldoc is not installed/, 'Help' );
-}else{
-	# following tests should be successful
 	($rc,$x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new(); ), '-help');
-	is( $rc, 1, '-help' );
+	is( $rc, 1, 'help' );
 	print ">$x[0]<\n";
 	like( $x[0], qr/No documentation found for/, 'Help' );
 
 	my $line = sprintf "%s\__END__\n=head Name\ntest\n\n=cut\n", q(use Script::Toolbox qw(:all); Script::Toolbox->new(););
 	($rc,$x) = mkTST( $line, '-help');
-	is( $rc, 1, '-help' );
+	is( $rc, 1, 'help' );
 	like( $x[0], qr/User Contributed Perl Documentation/, 'Help' );
+}
+
+SKIP: {
+	skip "perldoc is installed.", 4 if ( $perldoc );
+
+	($rc,$x) = mkTST( q(use Script::Toolbox qw(:all); Script::Toolbox->new(); ), '-help');
+	is( $rc, 2, 'help' );
+	like( $x[0], qr/Missing nroff/, 'Help' );
+
+	$line = sprintf "%s\__END__\n=head Name\ntest\n\n=cut\n", q(use Script::Toolbox qw(:all); Script::Toolbox->new(););
+	($rc,$x) = mkTST( $line, '-help');
+	is( $rc, 2, 'help' );
+	like( $x[0], qr/Missing nroff/, 'Help' );
 }
