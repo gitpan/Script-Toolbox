@@ -29,7 +29,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -816,36 +816,21 @@ sub Stat($$)
     foreach my $f ( @{$dir} )
     {
         my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-            $atime,$mtime,$ctime,$blksize,$blocks) = stat("$path/$f");
-#        $stat->{$f}{'dev'}  = $dev;
-#        $stat->{$f}{'ino'}  = $ino;
-#        $stat->{$f}{'mode'} = $mode;
-#        $stat->{$f}{'nlink'}= $nlink;
-#        $stat->{$f}{'uid'}  = $uid;
-#        $stat->{$f}{'gid'}  = $gid;
-#        $stat->{$f}{'rdev'} = $rdev;
-#        $stat->{$f}{'size'} = $size;
-#        $stat->{$f}{'atime'}= $atime;
-#        $stat->{$f}{'mtime'}= $mtime;
-#        $stat->{$f}{'ctime'}= $ctime;
-#        $stat->{$f}{'blksize'}  = $blksize;
-#        $stat->{$f}{'blocks'}   = $blocks;
+            $atime,$mtime,$ctime,$blksize,$blocks) = CORE::stat("$path/$f");
 
-		(
-        $stat->{$f}{'dev'}  ,
-        $stat->{$f}{'ino'}  ,
-        $stat->{$f}{'mode'} ,
-        $stat->{$f}{'nlink'},
-        $stat->{$f}{'uid'}  ,
-        $stat->{$f}{'gid'}  ,
-        $stat->{$f}{'rdev'} ,
-        $stat->{$f}{'size'} ,
-        $stat->{$f}{'atime'},
-        $stat->{$f}{'mtime'},
-        $stat->{$f}{'ctime'},
-        $stat->{$f}{'blksize'} ,
-        $stat->{$f}{'blocks'}  
-		) = stat("$path/$f");
+        $stat->{$f}{'dev'}  = $dev;
+        $stat->{$f}{'ino'}  = $ino;
+        $stat->{$f}{'mode'} = $mode;
+        $stat->{$f}{'nlink'}= $nlink;
+        $stat->{$f}{'uid'}  = $uid;
+        $stat->{$f}{'gid'}  = $gid;
+        $stat->{$f}{'rdev'} = $rdev;
+        $stat->{$f}{'size'} = $size;
+        $stat->{$f}{'atime'}= $atime;
+        $stat->{$f}{'mtime'}= $mtime;
+        $stat->{$f}{'ctime'}= $ctime;
+        $stat->{$f}{'blksize'}  = $blksize;
+        $stat->{$f}{'blocks'}   = $blocks;
     }
     return $stat;
 }
