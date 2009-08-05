@@ -2,7 +2,7 @@
 # `make test'. After `make install' it should work as `perl 1.t'
 
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 BEGIN { use_ok('Script::Toolbox') };
 
 #########################
@@ -41,8 +41,14 @@ $str = sprintf "%.4d%.2d%.2d%.2d%.2d", $year+1900,$mon+1,$mday,$hour,$min+1;
 ok( $nn eq $str); #13
 
 $n = $F->Now({diff=>time()-3600});
-ok( $n->{seconds} == 3600 );
-ok( $n->{minutes} == 60   );
-ok( $n->{hours}   == 1    );
-ok( $n->{days}  > 0.0416666 && $n->{days} < 0.0416667 );
+ok( $n->{seconds} == 3600 ); #14
+ok( $n->{minutes} == 60   ); #15
+ok( $n->{hours}   == 1    ); #16
+ok( $n->{days}  > 0.0416666 && $n->{days} < 0.0416667 ); #17
 
+$n = $F->Now({diff=>time()-(25*3600+61)});
+ok( $n->{DHMS} eq "1d 01:01:01"); #18
+
+$t = localtime time()-(25*3600+61);
+$n = $F->Now({diff=>"$t"});
+ok( $n->{DHMS} eq "1d 01:01:01"); #18

@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 
 # Preloaded methods go here.
@@ -167,10 +167,16 @@ Script::Toolbox - Framework for the daily business scripts
   $n = Now();
   print $n->{mday},$n->{mon},  $n->{year},$n->{wday}, $n->{yday},
         $n->{isdst},$n->{sec}, $n->{min}, $n->{hour};
-  print $now->{epoch};
+  print Now->{epoch};
   $now = Now({format=>"%A, %B %d, %Y"}); # Monday, October 10, 2005
-  $now = Now({offset=>3600});            # now + 1 hour
-  $diff= Now({diff=>1214510269}); # difference to 2008-06-26 21:57:49
+  $now = Now({offset=>3600});                 # now + 1 hour
+  $diff= Now({diff=>time()+86400+3600+60+1}); # time+1d+1h+1min+1sec
+  print $diff->{seconds}; # 90061 
+  print $diff->{minutes}; # 1501.016
+  print $diff->{hours};   # 25.01694
+  print $diff->{days};    # 1.042373
+  print $diff->{DHMS};    # "1 days,1 hours,1 minutes,1 seconds"
+
 
   #----------------
   # Menue handling

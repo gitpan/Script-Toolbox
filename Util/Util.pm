@@ -9,6 +9,7 @@ use IO::Dir;
 use Data::Dumper;
 use Fatal qw(open close);
 use POSIX qw(strftime);
+use Time::ParseDate;
 
 require Exporter;
 
@@ -29,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -723,16 +724,28 @@ sub System($)
 # Compute the difference between NOW[+offset] and the time value given as 
 # second parameter. Return a hash reference holding the difference in seconds,
 # minutes, hours and days. Every value as a floating point number.
+#
+# The referenz time (rtime) may be an epoch value or any string parsable by
+# Time::ParseDate.
 #------------------------------------------------------------------------------
 sub _nowDiff($$)
 {
 	my ($now,$rtime) = @_;
 
+	$rtime = parsedate( $rtime ) if( $rtime !~ /^[0-9]+$/ );
+
+	my $secDiff= $now - $rtime;
+	my $D      = int $secDiff / 86400; my $x = $secDiff % 86400; 
+	my $H      = int $x       /  3600;    $x = $x       %  3600;
+	my $M      = int $x       /    60;    $x = $x       %    60;
+	my $S      = $x;
+
 	my %R;
-	$R{seconds}= $now - $rtime;
+	$R{seconds}= $secDiff;
 	$R{minutes}= $R{seconds} / 60.0;
 	$R{hours}  = $R{seconds} / 3600.0;
 	$R{days}   = $R{seconds} / 86400.0;
+	$R{DHMS}   = sprintf "%dd %.2d:%.2d:%.2d", $D,$H,$M,$S;
 	return \%R;
 }
 

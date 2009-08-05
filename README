@@ -1,3 +1,9 @@
+Script::Toolbox version 0.24 (2009/08/05)
+=========================================
+- new time format in Now({diff=><time>}) available
+  time may be an epoch seconds value 
+  or any string parseable by Time::ParseDate
+
 Script::Toolbox version 0.23 (2008/09/03)
 =========================================
 - bug fixing in Stat()
