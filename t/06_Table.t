@@ -38,6 +38,7 @@ BEGIN { use_ok('Script::Toolbox') };
 # its man page ( perldoc Test::More ) for help writing this test script.
 
 ##############################################################################
+unlink "/tmp/06_Table.log",<*.1>,<*.2>;
 
 $F = Script::Toolbox->new({logdir=>{mod=>'=s',mand=>1,default=>'/tmp'}});
 ##############################################################################
@@ -206,4 +207,4 @@ ok(my_eq_array($ref, $r));
 
 
 
-unlink "/tmp/6_Table.log",<*.1>,<*.2>;
+unlink "/tmp/06_Table.log",<*.1>,<*.2>;

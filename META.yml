@@ -1,7 +1,7 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Script-Toolbox
-version:      0.24
+version:      0.25
 version_from: Util/Util.pm
 installdirs:  site
 requires:
@@ -10,6 +10,7 @@ requires:
     File::stat:                    1
     IO::Dir:                       1
     IO::File:                      1
+    Time::ParseDate:               1
     UNIVERSAL:                     1
 
 distribution_type: module

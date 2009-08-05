@@ -1,3 +1,7 @@
+Script::Toolbox version 0.25 (2009/08/05)
+=========================================
+- some bug fixings in test code
+
 Script::Toolbox version 0.24 (2009/08/05)
 =========================================
 - new time format in Now({diff=><time>}) available

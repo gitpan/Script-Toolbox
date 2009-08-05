@@ -36,4 +36,4 @@ is( $new->get('dir'),  '/bin',		'SetOpsDef 4' );
 is( $op->SetOpt('dir', '/usr'), '/bin', 'SetOpt 1' );
 is( $op->GetOpt('dir'),'/usr',  'SetOpt 2' );
 
-unlink "/tmp/5_GetSet.log";
+unlink "/tmp/05_GetSet.log";

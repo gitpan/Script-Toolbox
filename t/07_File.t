@@ -12,6 +12,7 @@ BEGIN { use_ok('Script::Toolbox', qw(:all)) };
 
 ##############################################################################
 
+unlink "/tmp/07_File.log";
 $F = Script::Toolbox->new({logdir=>{mod=>'=s',mand=>1,default=>'/tmp'}});
 ##############################################################################
 ############################### TEST 2 #####################################
@@ -70,4 +71,4 @@ $f = File("/tmp/__xx__");
 ok( $f->[0] eq "Hello world." ); #25
 unlink "/tmp/__xx__";
 
-unlink "/tmp/7_File.log";
+unlink "/tmp/07_File.log";

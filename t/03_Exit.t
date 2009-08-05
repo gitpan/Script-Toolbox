@@ -63,3 +63,5 @@ SKIP: {
 	is( $rc, 2, 'help' );
 	like( $x[0], qr/Missing nroff/, 'Help' );
 }
+
+system( "rm -f /tmp/_tst_.log.*" );
