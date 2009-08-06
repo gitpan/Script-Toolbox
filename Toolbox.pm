@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.25';
+our $VERSION = '0.26';
 
 
 # Preloaded methods go here.
@@ -90,8 +90,8 @@ Script::Toolbox - Framework for the daily business scripts
   #----------------------
   # Command line options
   #----------------------
-  $x={file=>{mod=>"=s",desc=>"Description",mand=>1,default=>"/bin/cat"}};
-  $tb=Script::Toolbox->new( $x );
+  $x    = {file=>{mod=>"=s",desc=>"Description",mand=>1,default=>"/bin/cat"}};
+  $tb   = Script::Toolbox->new( $x );
   $file = tb->{"file"};
   $old  = tb->SetOpt("newFile");
 
@@ -110,29 +110,29 @@ Script::Toolbox - Framework for the daily business scripts
   $arrRef = Dir("/tmp", ".*patt" );  # all matching patt
   $arrRef = Dir("/tmp", "!.*patt" ); # all not matching patt
 
-  $stat = Stat("/bin");   # like Dir() with stat() for each file
-  $stat = Stat("/bin",".*grep"); # grep,egrep,fgrep
+  $stat   = Stat("/bin");   # like Dir() with stat() for each file
+  $stat   = Stat("/bin",".*grep"); # grep,egrep,fgrep
 
   #---------------
   # File handling
   #---------------
   # READ file
   $arrRef = File("path/to/file");              # read file into array
-  $arrRef = File("/bin/ps |");        # read comand STDOUT into array
+  $arrRef = File("/bin/ps |");                 # read comand STDOUT into array
   $arrRef = File("path/to/file", \&callback ); # filter with callback
 
   # WRITE file
   File( "> path/to/file", "override the old content" );
-  File( "path/to/file", "append this to the file" );
-  File( "path/to/file", $arrRef );          # append array elements 
-  File( "path/to/file", $arrRef, $recSep ); # append array elements 
+  File( "path/to/file",   "append this to the file" );
+  File( "path/to/file",   $arrRef );           # append array elements 
+  File( "path/to/file",   $arrRef, $recSep );  # append array elements 
 
                               # append key <$fldSep> value <$recSep>
   File( "path/to/file", $hashRef, $recSep, $fieldSep);
   File( "| /bin/cat", "Hello world.\n" );
 
-  $fileHandle = TmpFile(); # open new temporary file
-  $arrRef = TmpFile($fileHandle) # read temp whole file
+  $fileHandle = TmpFile();                     # open new temporary file
+  $arrRef     = TmpFile($fileHandle)           # read temp whole file
 
 
   #---------------------------------------------
@@ -161,21 +161,22 @@ Script::Toolbox - Framework for the daily business scripts
   $rc = System("/bin/ls")    # execute a system command and
                              # report it's output into the 
                              # logfile.
+
   #------------------------+
   # Date and time handling |
   #------------------------+
-  $n = Now();
-  print $n->{mday},$n->{mon},  $n->{year},$n->{wday}, $n->{yday},
-        $n->{isdst},$n->{sec}, $n->{min}, $n->{hour};
-  print Now->{epoch};
-  $now = Now({format=>"%A, %B %d, %Y"}); # Monday, October 10, 2005
+  $n   = Now();
+  print  $n->{mday},$n->{mon},  $n->{year},$n->{wday}, $n->{yday},
+         $n->{isdst},$n->{sec}, $n->{min}, $n->{hour};
+  print  Now->{epoch};
+  $now = Now({format=>"%A, %B %d, %Y"});      # Monday, October 10, 2005
   $now = Now({offset=>3600});                 # now + 1 hour
   $diff= Now({diff=>time()+86400+3600+60+1}); # time+1d+1h+1min+1sec
-  print $diff->{seconds}; # 90061 
-  print $diff->{minutes}; # 1501.016
-  print $diff->{hours};   # 25.01694
-  print $diff->{days};    # 1.042373
-  print $diff->{DHMS};    # "1 days,1 hours,1 minutes,1 seconds"
+  print  $diff->{seconds};                    # 90061 
+  print  $diff->{minutes};                    # 1501.016
+  print  $diff->{hours};                      # 25.01694
+  print  $diff->{days};                       # 1.042373
+  print  $diff->{DHMS};                       # "1d 01:01:01"
 
 
   #----------------
@@ -184,27 +185,27 @@ Script::Toolbox - Framework for the daily business scripts
   # using Menue to start subroutines
   my $mainMenue = [{label=>"EXIT", jump=>\&_exit, argv=>0},
                    {label=>"Edit Hosts", jump=>\&editHosts, argv=>$ops},
-                   {label=>"Activate Host", jump=>\&activate, argv=>$ops},
-                  ];
+                   {label=>"Activate Host", jump=>\&activate, argv=>$ops}, ];
   while(( 1 ) { my ($o,$mainMenue) = Menue($mainMenue); }
 
   # using Menue to display and edit some few data values
   my $dataMene = [{label=>"EXIT"},
                   {label=>"Name",value=>""},
                   {label=>"ZIP", value=>"01468"},
-                  {label=>"City",value=>"Templeton"}
-                 ];
+                  {label=>"City",value=>"Templeton"} ];
 
-  while( 1 ) { my ($o,$dataMenue) = Menue($dataMenue);
-               last if( $o == 0 ); }
+  while( 1 ) {
+    my ($o,$dataMenue) = Menue($dataMenue);
+    last if( $o == 0 );
+  }
                 
   # this is the output:
-  #0 EXIT
-  #1 Name  []
-  #2 ZIP   [01468]
-  #3 City  [Templeton]
+  # 0 EXIT
+  # 1 Name  []
+  # 2 ZIP   [01468]
+  # 3 City  [Templeton]
   #
-  #Select: 
+  # Select: 
 
 =head1 ABSTRACT
 
@@ -353,18 +354,28 @@ of the perl script using Script::Toolbox.pm;
 
 
 
-=item Now({format=><'strftime-format'>, offset=><+-seconds>, diff=><time>})
+=item Now({format=><'strftime-format'>, offset=><+-seconds>})
 
 Return the actual date and time. If $format is undef the result is a hash
 ref. The keys are: I<sec min hour mday mon year wday yday isdst epoch.> 
 Month and year are corrected. Epoch is the time in seconds since 1.1.1970.
 If $format is not undef it must be a strftime() format string. The result
-of Now() is then the strftime() formated string. If defined, offset will be 
-added to the epoch seconds before any format converting takes place. If $diff 
-is set it must be a value in epoch seconds. In that case Now() returns a hash 
-ref with keys I<seconds minutes hours days>. Each corresponding value is the 
+of Now() is then the strftime() formated date string. If defined, offset will be 
+added to the epoch seconds before any format convertion takes place.
+
+=item Now({diff=><time>})
+$diff may be a value in epoch seconds or any string parseable by Time::ParseDate.
+If Now() is called with a diff argument it returns a hash ref with following keys
+I<seconds minutes hours days DHMS>. Each corresponding value is the 
 difference between now and the given time value.
 
+    Example:
+    my $d = Now( time()- 1800 );
+    print $d->{seconds} ."s"; 	# 1800.0s
+    print $d->{minutes} ."min";	# 30.0min
+    print $d->{hours}   ."h";	# 0.5h
+    print $d->{days}    ."d";	# 0.02083d
+    print $d->{DHMS};		# 0d 00:30:00
 
 
 =item Stat("/path/to/dir", "!regexp")
