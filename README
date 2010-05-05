@@ -1,3 +1,8 @@
+Script::Toolbox version 0.27 (2010/05/05)
+=========================================
+- tests adapted to perl, v5.10.0 built for darwin-thread-multi-2level
+- fix in signal handling
+
 Script::Toolbox version 0.26 (2009/08/06)
 =========================================
 - some fixings in POD
