@@ -1,10 +1,13 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Script-Toolbox
-version:      0.25
-version_from: Util/Util.pm
-installdirs:  site
-requires:
+--- #YAML:1.0
+name:                Script-Toolbox
+version:             0.27
+abstract:            Framework for the daily business scripts
+license:             ~
+author:              
+    - Matthias Eckardt <www.link-up.de>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
     Data::Dumper:                  2
     Fatal:                         1
     File::stat:                    1
@@ -12,6 +15,6 @@ requires:
     IO::File:                      1
     Time::ParseDate:               1
     UNIVERSAL:                     1
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

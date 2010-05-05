@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -103,17 +103,6 @@ sub _installOps($)
 }
 
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-sub _installSigHandlers()
-{
-    my ($self) = @_;
-    $SIG{'INT'} = '_sigExit';
-    $SIG{'HUP'} = '_sigExit';
-    $SIG{'QUIT'}= '_sigExit';
-    $SIG{'TERM'}= '_sigExit';
-}
-
-#------------------------------------------------------------------------------
 # Signal handler.
 #------------------------------------------------------------------------------
 sub _sigExit($)
@@ -121,6 +110,18 @@ sub _sigExit($)
     my ($sig) = @_;
     Exit( 1, "program aborted by signal SIG$sig." );
 }
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+sub _installSigHandlers()
+{
+    my ($self) = @_;
+    $SIG{'INT'} = \&_sigExit;
+    $SIG{'HUP'} = \&_sigExit;
+    $SIG{'QUIT'}= \&_sigExit;
+    $SIG{'TERM'}= \&_sigExit;
+}
+
 
 #------------------------------------------------------------------------------
 # Log a message and exit the programm with the given error code.
