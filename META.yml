@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                Script-Toolbox
-version:             0.27
+version:             0.28
 abstract:            Framework for the daily business scripts
 license:             ~
 author:              

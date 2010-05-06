@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -141,7 +141,6 @@ sub _dieHook
 {
     my @y = split /\n/, $_[0];
     map { Log( $_ ); } @y;
-    exit 1 if( $#y > -1 );
 };
 $main::SIG{'__DIE__'} = \&_dieHook;  # install die hook
 
