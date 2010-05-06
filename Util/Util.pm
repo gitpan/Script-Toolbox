@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -139,6 +139,8 @@ sub Exit($$)
 #------------------------------------------------------------------------------
 sub _dieHook
 {
+	die @_ if $^S;
+
     my @y = split /\n/, $_[0];
     map { Log( $_ ); } @y;
 };
