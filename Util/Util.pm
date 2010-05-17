@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 # Preloaded methods go here.
 sub _getKV(@);

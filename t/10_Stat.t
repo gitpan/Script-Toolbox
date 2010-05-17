@@ -24,20 +24,20 @@ foreach my $x ( keys %{$d} )
 }
 
 ############################### TEST 3-15 #####################################
-$d = $F->Stat('/bin','echo');
-ok( $d->{'echo'}{atime} 	>  0 );
-ok( $d->{'echo'}{blksize} 	>  0 );
-ok( $d->{'echo'}{blocks} 	>  0 );
-ok( $d->{'echo'}{ctime} 	>  0 );
-ok( $d->{'echo'}{dev} 		>  0 );
-ok( $d->{'echo'}{gid} 		>= 0 );
-ok( $d->{'echo'}{ino} 		>  0 );
-ok( $d->{'echo'}{mode} 		>  0 );
-ok( $d->{'echo'}{mtime} 	>  0 );
-ok( $d->{'echo'}{nlink} 	>  0 );
-ok( $d->{'echo'}{rdev} 		>= 0 );
-ok( $d->{'echo'}{size} 		>  0 );
-ok( $d->{'echo'}{uid} 		>= 0 );
+$d = $F->Stat('./t/','10_Stat.t');
+ok( $d->{'10_Stat.t'}{atime} 	>  0 );
+ok( $d->{'10_Stat.t'}{blksize} 	>  0 );
+ok( $d->{'10_Stat.t'}{blocks} 	>  0 );
+ok( $d->{'10_Stat.t'}{ctime} 	>  0 );
+ok( $d->{'10_Stat.t'}{dev} 		>  0 );
+ok( $d->{'10_Stat.t'}{gid} 		>= 0 );
+ok( $d->{'10_Stat.t'}{ino} 		>  0 );
+ok( $d->{'10_Stat.t'}{mode} 	>  0 );
+ok( $d->{'10_Stat.t'}{mtime} 	>  0 );
+ok( $d->{'10_Stat.t'}{nlink} 	>  0 );
+ok( $d->{'10_Stat.t'}{rdev} 	>= 0 );
+ok( $d->{'10_Stat.t'}{size} 	>  0 );
+ok( $d->{'10_Stat.t'}{uid} 		>= 0 );
 
 
 ############################### TEST 16-17 #####################################
