@@ -1,3 +1,7 @@
+Script::Toolbox version 0.31 (2010/07/21)
+=========================================
+- the test if we have nroff or perldoc install has been changed
+
 Script::Toolbox version 0.30 (2010/05/17)
 =========================================
 - a new test script (10_Stat.t)  fits with cygwin 
