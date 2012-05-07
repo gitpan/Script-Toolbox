@@ -1,3 +1,10 @@
+Script::Toolbox version 0.41 (2012/05/07)
+- I'm sorry for the long time without  any published changes/fixes
+- The test suit has still some issues, I'm sorry!
+- I can't remember all the changes over the time, I'm sorry again!
+- Documentation of Menue() improved
+- Menue() has now HEADER and FOOTER lines
+
 Script::Toolbox version 0.31 (2010/07/21)
 =========================================
 - the test if we have nroff or perldoc install has been changed

@@ -17,7 +17,7 @@ our @ISA = qw(Script::Toolbox::Util Script::Toolbox::Util::Opt Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File
-						           System Now Menue KeyMap Stat) ] );
+						           System Now Menue KeyMap Stat TmpFile) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.31';
+our $VERSION = '0.41';
 
 
 # Preloaded methods go here.
@@ -187,6 +187,16 @@ Script::Toolbox - Framework for the daily business scripts
                    {label=>"Edit Hosts", jump=>\&editHosts, argv=>$ops},
                    {label=>"Activate Host", jump=>\&activate, argv=>$ops}, ];
   while(( 1 ) { my ($o,$mainMenue) = Menue($mainMenue); }
+
+  # or ...
+  my ($resp, $menue) = Menue([{label=>'One'},{label=>'Two'},{label=>'Three'}]);
+  print "Second Option" if( $resp == 2 );
+
+  # or with header and footer
+  my ($resp, $menue) = Menue([{header=>'This is the optional head line.'}, 
+                              {label=>'One'},{label=>'Two'},{label=>'Three'},
+                              {header=>'This is the optional footer line.'}]);
+  print "Second Option" if( $resp == 2 );
 
   # using Menue to display and edit some few data values
   my $dataMene = [{label=>"EXIT"},
@@ -450,6 +460,18 @@ is the order of the sorted keys of the hash in the first array element.
 
 =back
 
+=item Menue
+
+There are two types of menues. Regular menues and data menues.
+All menues use the madatory key 'label'. 
+A data menue has the mandatory key 'value'.
+
+Optional keys for both types are 'header' and 'footer'. All Entries with
+these keys will be printed on top resp. below the option lines.
+
+Regular menues may use the optional keys 'jump' and 'argv'. Jump points
+to a handler subroutine. Argv points to the arguments of the handler
+subroutine.
 
 =head1 SIGNALS
 
@@ -476,7 +498,7 @@ Matthias Eckardt, E<lt>Matthias.Eckardt@imunixx.deE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2002-2008 by Matthias Eckardt, imunixx GmbH
+Copyright 2002-2012 by Matthias Eckardt, imunixx GmbH
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

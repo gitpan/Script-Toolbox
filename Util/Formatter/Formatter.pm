@@ -38,12 +38,76 @@ sub _init
 	$self->{'title'}= defined $container->{'title'} ?
 	                          $container->{'title'} :
 						     'Title';
+
+	if( ref $container->{'data'} eq 'ARRAY' ) {
+		$self->_initHashArray ( $container ) if( ref $container->{'data'}[0] eq 'HASH' );
+		$self->_initArray     ( $container ) if( ref $container->{'data'}[0] eq 'ARRAY');
+	}
+
+	if( ref $container->{'data'} eq 'HASH' ) {
+		$self->_initHashHash  ( $container ) if( ref $container->{'data'}    eq 'HASH' );
+	}
+
 	$self->{'head'} = defined $container->{'head'} ?
 	                          $container->{'head'} :
-						      _getDefaultHeader($container->{'data'});
+						      _getDefaultHeader($container);
 
-	$self->_initArray( $container )	if( ref $container->{'data'}[0] eq 'ARRAY');
-	$self->_initHash ( $container )	if( ref $container->{'data'}[0] eq 'HASH' );
+
+}
+
+#------------------------------------------------------------------------------
+# Extract column keys from first data row.
+# 'data'  => {
+#              key1 => {F1=>'aaa', F2=>'bb   ', F3=>3}
+#              key2 => {F1=>11111, F2=>2222222, F3=>3}
+#            }
+#------------------------------------------------------------------------------
+sub _getHeadsFromFirstRow($)
+{
+	my ($data) = @_;
+	my @H;
+	push( @H, "KEY" );
+	foreach my $d ( values %{$data} )
+	{
+		map{ push( @H, $_ ) } sort keys %{$d};
+		last;
+	}
+	#return \@H;
+	return @H;
+}
+
+#------------------------------------------------------------------------------
+# 'title'  => 'Test1',
+# 'head'  => ['RowKey', Field1', 'Field2', 'Field3'],
+# 'data'  => {
+#              key1 => {F1=>'aaa', F2=>'bb   ', F3=>3}
+#              key2 => {F1=>11111, F2=>2222222, F3=>3}
+#            }
+#------------------------------------------------------------------------------
+sub _initHashHash($$)
+{
+	my ($self,$container) = @_;
+
+	if( ref $container->{'data'} eq 'HASH' )
+	{
+		@{$self->{'head'}} = _getHeadsFromFirstRow( $container->{'data'} );
+		my @D;
+		foreach my $lk ( sort keys %{$container->{'data'}} )
+		{
+			my $l = $container->{'data'}{$lk};
+			my @L;
+			foreach my $k ( @{$self->{'head'}} )
+			{
+				# auto generated meta column
+				if( $k eq 'KEY' ) { push @L,$lk; next }
+
+				$self->_logit( $k, $l )	if( !defined $l->{$k} );
+				push @L, $l->{$k};
+			}
+			push @D, \@L;
+		}
+		$self->{data} = \@D;
+	}
 }
 
 #------------------------------------------------------------------------------
@@ -59,7 +123,7 @@ sub _init
 #              {F1=>11111, F2=>2222222, F3=>3}
 #            ]
 #------------------------------------------------------------------------------
-sub _initHash($$)
+sub _initHashArray($$)
 {
 	my ($self,$container) = @_;
 	$self->{'data'}  = $self->_getData($container);
@@ -132,7 +196,32 @@ sub _getDefaultHeader($)
 {
 	my ($cont) = @_;
 	my @hd;
-	for( my $i=0; $i <= $#{$cont->[0]}; $i++ ) { push @hd, "Col-$i"; }
+
+	if( ref $cont->{'data'} eq 'ARRAY' ) {
+		 if( ref $cont->{'data'}[0] eq 'HASH' ) {
+			 foreach my $h ( sort keys %{$cont->{'data'}[0]} ) { push @hd, $h; }
+		 }
+		 if( ref $cont->{'data'}[0] eq 'ARRAY') {
+			 for( my $i=0; $i <= $#{$cont->{'data'}[0]}; $i++ ) { push @hd, "Col-$i"; }
+		 }
+	}
+
+	# 'data'  => {
+	# 'line1' => { 'F1' => 'aaaa', 'F2' => 'bbb   ', 'F3' => 'c' },
+	# 'line2' => { 'F1' => 'dddd', 'F2' => 'eee   ', 'F3' => 'f' }
+	# }
+	if( ref $cont->{'data'} eq 'HASH' ) {
+		foreach my $line ( values %{$cont->{'data'}} )
+		{
+			push @hd, "KEY";
+			foreach my $fldName ( sort keys %{$line} )
+			{
+				push @hd, $fldName;
+			}
+			last;
+		}
+	}
+
 	return \@hd;
 }
 

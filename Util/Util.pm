@@ -22,7 +22,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Script::Toolbox::Util ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue KeyMap Stat) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue KeyMap Stat TmpFile) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.31';
+our $VERSION = '0.41';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -207,10 +207,11 @@ sub Open(@)
 {
 	my ($file) = _getParam(@_);
 	my $fh = new IO::File;
-	$fh->open( "$file" ) || return undef;
+	$fh->open( "$file" );
+	#$fh->open( "$file" ) || return undef;
 	return $fh;
 }
-use Fatal qw(Open);
+use Fatal qw(IO::File::open);
 
 
 #------------------------------------------------------------------------------
@@ -230,12 +231,20 @@ sub Table(@)
 }
 
 #------------------------------------------------------------------------------
+# $param must be a hash reference. This Hash must have a key "data".
+# This key may point to:
+# 		arrayref 
+# 		hashref
 #------------------------------------------------------------------------------
 sub _noData($)
 {
 	my ($param) = @_;
 
-	if( ref $param eq 'HASH' && !defined $param->{'data'}[0] )
+	return 0 if( ref $param ne 'HASH' );
+	return 0 if( ref $param->{'data'} eq 'HASH' );
+	return 0 if( ref $param->{'data'} eq 'ARRAY');
+
+	if( !defined $param->{'data'}[0] )
 	{
 	    Log( "WARNING: no input data for Table()." );
 	    return 1;
@@ -244,6 +253,14 @@ sub _noData($)
 }
 
 #------------------------------------------------------------------------------
+# Valid Calls:
+#	[ "csvString", "csvString",...], 				 undef
+#	[ "csvString", "csvString",...], 				 separatorString
+#	[ "TitelString", [headArray], [dataArray],...],  undef
+#	[ [dataArray],...],  							 undef
+#	{title=>"", head=>[], data=>[[],[],...] },		 undef
+#	{title=>"", head=>[], data=>[{},{},...] },		 undef
+#	{title=>"", head=>[], data=>{r1=>{c1=>,c2=>,},r2=>{c1=>,c2=>,},}, undef
 #------------------------------------------------------------------------------
 sub _normParam($$)
 {
@@ -251,13 +268,12 @@ sub _normParam($$)
 
 	if( ref $param eq 'HASH' )
 	{
-	return _sepHash($param, $separator)	if( _isCSV($param->{'data'}) );
-	return $param;
+	    # keine Ahnung wozu: return _sepHash($param, $separator)	if( _isCSV($param->{'data'}) );
+	    return $param;
 	}
-	return _sepTitleHead($param)	if( _isTitleHead($param) );
-	return _sepCSV($param, $separator) 	if( _isCSV($param) );
-
-	Log( "ERROR invalid Table() parameter" );
+	return _sepTitleHead($param)		if( _isTitleHead($param) );
+	return _sepCSV($param, $separator) 	if( _isCSV($param, $separator) );
+	return { 'data' => $param };
 }
 
 #------------------------------------------------------------------------------
@@ -271,18 +287,22 @@ sub _sepHash($$)
 	return $param;
 }
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# Check if we found the special data array format.
+# ["TitleString", [headString,headString,...],[data,...],...]
 #------------------------------------------------------------------------------
 sub _isTitleHead($)
 {
 	my ($param) = @_;
 
-	return 1	if( ref \$param->[0] eq 'SCALAR' &&
-		  	ref $param->[1] eq 'ARRAY' );
+	return 1	if( ref \$param->[0] eq 'SCALAR' && ref $param->[1] eq 'ARRAY' );
 	return 0;
 }
 
 #------------------------------------------------------------------------------
+# Transform the special data array
+# ["TitleString", [headString,headString,...],[data,...],...]
+# into hash format. 
 #------------------------------------------------------------------------------
 sub _sepTitleHead($)
 {
@@ -300,17 +320,26 @@ sub _sepTitleHead($)
 
 
 #------------------------------------------------------------------------------
+#	[[],[],...]
+#	[{},{},...]
+#	{r1=>{c1=>,c2=>,},r2=>{c1=>,c2=>,},}
 #------------------------------------------------------------------------------
-sub _isCSV($)
+sub _isCSV($$)
 {
-	my ($param) = @_;
+	my ($param, $separator) = @_;
 
-	return 1	if( ref \$param->[0] eq 'SCALAR' &&
-		  	ref \$param->[1] eq 'SCALAR' );
+	return 0	if( ref  $param      ne 'ARRAY' );
+
+	$separator = ';'	unless defined $separator; #FIXME default sep
+	return 1    if( $param->[0] =~ /$separator/ ); #assume it's a CSV record
 	return 0;
 }
 
 #------------------------------------------------------------------------------
+# Convert an array of CSV strings into an array of arrays.
+#
+# [ "a;b","c,d"] becomes
+# [[a,b], [c,d]]
 #------------------------------------------------------------------------------
 sub _sepCSV($$)
 {
@@ -320,9 +349,8 @@ sub _sepCSV($$)
 	my @R;
 	foreach my $l ( @{$param} )
 	{
-	my @r;
-	push @r, split /$separator/, $l;
-	push @R, \@r;
+	    my @r = split /$separator/, $l;
+	    push @R, \@r;
 	}
 
 	return { 'data' => \@R };
@@ -782,6 +810,25 @@ sub Now(@)
 }
 
 #------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+sub _printMenueHeader($) {
+     my ($opts) = @_;
+     foreach my $op ( @{$opts} ){
+         next     if( ! $op->{'header'} );
+         printf "%s\n", $op->{'header'};
+     }
+}
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+sub _printMenueFooter($) {
+     my ($opts) = @_;
+     foreach my $op ( @{$opts} ){
+         next     if( ! $op->{'footer'} );
+         printf "%s\n", $op->{'footer'};
+     }
+}
+#------------------------------------------------------------------------------
 # Display a menue, return the selected index number and the menue data structure.
 # If a VALUE or DEFAULT key of a menue option points to a value this value can
 # be changed.
@@ -791,7 +838,8 @@ sub Now(@)
 # - label=> must be defined all other keys are optinal
 # - jump=> must point to a subroutine if set
 # - argv=> arguments for the subroutine jump points to
-# 
+# - header=> an optional head line
+# - footer=> an optional footer line
 #------------------------------------------------------------------------------
 sub Menue($)
 {
@@ -801,12 +849,14 @@ sub Menue($)
     my $maxLen = _maxLabelLength($opts);
     my $form1 = "%3d %-${maxLen}s ";
     system("clear");
+    _printMenueHeader($opts);
     ($i,$o) = (0,0);
     foreach my $op ( @{$opts} )
     {
         my ($def,$form)=_getDefForm($form1,$op);
         printf $form, $i++,$op->{'label'},$def;
     }
+    _printMenueFooter($opts);
     printf "\nSelect: ";
     $o = _getNumber( $i-1);
     if( $o < $i && $o > -1 )
@@ -888,7 +938,7 @@ sub _getDefForm($$)
 {
     my ($form1,$op) = @_;
 
-    my ($def,$fotm);
+    my $def;
     $def = $op->{'value'}   if( defined $op->{'value'} );
     my $form = defined $def ? "$form1 [%s]" : $form1;
 

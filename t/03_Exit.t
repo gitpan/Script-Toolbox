@@ -35,10 +35,10 @@ use Script::Toolbox qw(:all);
 is( $rc, 2, 'Exit' );
 like( $x[0], qr/\d{4}:\s+test/, 'Exit' );
 
-#my $nroff  = !(system("type nroff   >/dev/null 2>&1") / 256);
-#my $perldoc= !(system("type perldoc >/dev/null 2>&1") / 256);
-my $nroff  = !(system("nroff </dev/null  >/dev/null 2>&1") / 256);
-my $perldoc= !(system("perldoc perlfunc </dev/null >/dev/null 2>&1") / 256);
+#my $nroff  = `nroff -v | grep -v "not.*found" | wc -l`;
+#my $perldoc= `perldoc </dev/null 2>&1 | grep FAQKeywords | wc -l`;
+my $nroff  = !(system("nroff </dev/null  >/dev/null 2>&1"));
+my $perldoc= !(system("perldoc perlfunc </dev/null >/dev/null 2>&1"));
 SKIP: {
 	skip "nroff or perldoc is not installed.", 4 if ( !($nroff && $perldoc) );
 

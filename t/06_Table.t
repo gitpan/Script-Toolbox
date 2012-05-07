@@ -29,7 +29,7 @@ sub my_eq_array($$)
 #########################
 #########################
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 BEGIN { use_ok('Script::Toolbox') };
 
 #########################
@@ -64,7 +64,6 @@ ok(my_eq_array($ref, $r));
 ############################### TEST 3 #####################################
 $rep2 = {
 	'title'	=> 'Test3',
-	'head'	=> ['unused1', 'unused2', 'unused3'],
 	'data'	=> [
 				{ 'F1' => 'aaaa', 'F2' => 'bbb   ', 'F3' => 'c' },
 				{ 'F1' => 'dddd', 'F2' => 'eee   ', 'F3' => 'f' }
@@ -226,6 +225,25 @@ $ref = [
 printM($ref, $r, 'JJ');
 ok(my_eq_array($ref, $r));
 
+
+############################### TEST 12 #####################################
+$rep11 = {
+	'title'	=> 'Test12',
+	'data'	=> {
+				'line1' => { 'F1' => 'aaaa', 'F2' => 'bbb   ', 'F3' => 'c' },
+				'line2' => { 'F1' => 'dddd', 'F2' => 'eee   ', 'F3' => 'f' }
+			   }
+};
+
+$r = $F->Table( $rep11 );
+$ref = ["== Test12 ==",
+		"KEY   F1   F2  F3",
+		"----- ---- --- --",
+		"line1 aaaa bbb c ",
+		"line2 dddd eee f ",
+		];
+printM($ref, $r, 'BB');
+ok(my_eq_array($ref, $r));
 
 
 unlink "/tmp/06_Table.log",<*.1>,<*.2>;
