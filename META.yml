@@ -25,4 +25,4 @@ requires:
   IO::File: 1
   Time::ParseDate: 1
   UNIVERSAL: 1
-version: 0.41
+version: 0.42

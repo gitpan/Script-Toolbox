@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -205,7 +205,7 @@ sub _openFromString($)
 #------------------------------------------------------------------------------
 sub Open(@)
 {
-	my ($file) = _getParam(@_);
+	my ($file, $iolayer) = _getParam(@_);
 	my $fh = new IO::File;
 	$fh->open( "$file" );
 	#$fh->open( "$file" ) || return undef;
@@ -853,6 +853,7 @@ sub Menue($)
     ($i,$o) = (0,0);
     foreach my $op ( @{$opts} )
     {
+        next if( ! $op->{'label'} );
         my ($def,$form)=_getDefForm($form1,$op);
         printf $form, $i++,$op->{'label'},$def;
     }
