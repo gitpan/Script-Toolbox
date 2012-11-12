@@ -25,7 +25,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 
 # Preloaded methods go here.
@@ -90,7 +90,10 @@ Script::Toolbox - Framework for the daily business scripts
   #----------------------
   # Command line options
   #----------------------
-  $x    = {file=>{mod=>"=s",desc=>"Description",mand=>1,default=>"/bin/cat"}};
+  $x    = {file=>{mod=>"=s",desc=>"Description",mand=>1,default=>"/bin/cat"},
+           int =>{mod=>"=i",desc=>"Integer option", mand=>1, default=>"10" },
+           flag=>{          desc=>"Boolean option", mand=>0                },
+          };
   $tb   = Script::Toolbox->new( $x );
   $file = tb->{"file"};
   $old  = tb->SetOpt("newFile");
@@ -183,7 +186,9 @@ Script::Toolbox - Framework for the daily business scripts
   # Menue handling
   #----------------
   # using Menue to start subroutines
-  my $mainMenue = [{label=>"EXIT", jump=>\&_exit, argv=>0},
+  my $mainMenue = [{header=>"This is the line on top"},
+                   {footer=>"This is the bottom line."},
+                   {label=>"EXIT", jump=>\&_exit, argv=>0},
                    {label=>"Edit Hosts", jump=>\&editHosts, argv=>$ops},
                    {label=>"Activate Host", jump=>\&activate, argv=>$ops}, ];
   while(( 1 ) { my ($o,$mainMenue) = Menue($mainMenue); }
