@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -828,6 +828,25 @@ sub _printMenueFooter($) {
          printf "%s\n", $op->{'footer'};
      }
 }
+
+#------------------------------------------------------------------------------
+# Compute real index if we have NON-Lable lines in the opts-array.
+#------------------------------------------------------------------------------
+sub _getRealIndex($$) {
+    my ($o, $opts) = @_;
+
+    my $real = 0;
+    my $curr = 0;
+    foreach my $op ( @{$opts} )
+    {
+        $real++         if( ! $op->{'label'} );
+        return $real    if( $o == $curr );
+        $real++;
+        $curr++;
+    }
+    return $real;
+}
+
 #------------------------------------------------------------------------------
 # Display a menue, return the selected index number and the menue data structure.
 # If a VALUE or DEFAULT key of a menue option points to a value this value can
@@ -862,8 +881,9 @@ sub Menue($)
     $o = _getNumber( $i-1);
     if( $o < $i && $o > -1 )
     {
-        _setValue($o, $opts);
-        _jump($o, $opts); # jump to callback if defined
+        my $oo = _getRealIndex($o, $opts);
+        _setValue($oo, $opts);
+        _jump($oo, $opts); # jump to callback if defined
     }
     return $o,$opts;
 }
@@ -926,6 +946,7 @@ sub _maxLabelLength($)
     my $len=0;
     foreach my $op ( @{$opts} )
     {
+        next  if( ! defined $op->{'label'});
         my $l = length($op->{'label'});
         $len = $len < $l ? $l : $len;
     }

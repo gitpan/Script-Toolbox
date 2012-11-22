@@ -1,3 +1,7 @@
+Script::Toolbox version 0.44 (2012/11/20)
+=========================================
+- bugfix in Menue(), Menues with header/footer lines
+
 Script::Toolbox version 0.43 (2012/11/12)
 =========================================
 - some documentation tasks
