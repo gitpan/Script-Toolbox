@@ -1,28 +1,28 @@
----
-abstract: 'Framework for the daily business scripts'
+--- #YAML:1.0
+name:               Script-Toolbox
+version:            0.45
+abstract:           Framework for the daily business scripts
 author:
-  - 'Matthias Eckardt <www.link-up.de>'
-build_requires:
-  ExtUtils::MakeMaker: 0
+    - Matthias Eckardt <www.link-up.de>
+license:            unknown
+distribution_type:  module
 configure_requires:
-  ExtUtils::MakeMaker: 0
-dynamic_config: 1
-generated_by: 'ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150'
-license: unknown
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.4.html
-  version: 1.4
-name: Script-Toolbox
-no_index:
-  directory:
-    - t
-    - inc
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
 requires:
-  Data::Dumper: 2
-  Fatal: 1
-  File::stat: 1
-  IO::Dir: 1
-  IO::File: 1
-  Time::ParseDate: 1
-  UNIVERSAL: 1
-version: 0.44
+    Data::Dumper:     2
+    Fatal:            1
+    File::stat:       1
+    IO::Dir:          1
+    IO::File:         1
+    Time::ParseDate:  1
+    UNIVERSAL:        1
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.56
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

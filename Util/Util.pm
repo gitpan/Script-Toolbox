@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -550,7 +550,7 @@ sub _WriteFile($$)
 	}
 	   if( ref $newContent eq '' ) 	   {print $fh $newContent;}
 	elsif( _simpleArray( $newContent))
-	     { _printSimpleArray($newContent, $fh, $recSep,$fieldSep)}
+	     { _printSimpleArray($newContent, $fh, $recSep)}
 	elsif( _simpleHash( $newContent ))
 	     { _printSimpleHash($newContent, $fh, $recSep,$fieldSep)}
 	else { print $fh Dumper $newContent; }

@@ -1,3 +1,7 @@
+Script::Toolbox version 0.45 (2013/01/24)
+=========================================
+- bugfix in Util::File, write arrayref with record separator
+
 Script::Toolbox version 0.44 (2012/11/20)
 =========================================
 - bugfix in Menue(), Menues with header/footer lines
