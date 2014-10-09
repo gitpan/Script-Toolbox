@@ -58,7 +58,8 @@ sub mkTST(@)
 	system( "rm -f /tmp/_TST_*.log /tmp/_tst_*.log" );
 	# run test
 	$opt = defined $opt ? $opt : '';
-	my $rc = system( "perl _TST_ $opt >/tmp/_tst_STDOUT 2>/tmp/_tst_STDERR" );
+    my $perlexe = $^X;
+	my $rc = system( "$perlexe  _TST_ $opt >/tmp/_tst_STDOUT 2>/tmp/_tst_STDERR" );
 
 	return $rc/256, getResults($opt);
 }

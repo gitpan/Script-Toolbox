@@ -12,7 +12,8 @@ sub mkTST(@)
 	close \*FH;
 
 	$opt = '' if( !defined $opt);
-	my $rc = system( "perl _TST_  $opt >>/tmp/_tst_.log 2>&1" );
+    my $perlexe = $^X;
+	my $rc = system( "$perlexe  _TST_  $opt >>/tmp/_tst_.log 2>&1" );
 
 	open( FH , "/tmp/_tst_.log" );
 	@x = <FH>;
