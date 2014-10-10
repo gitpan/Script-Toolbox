@@ -1,3 +1,11 @@
+Script::Toolbox version 0.47 (2014/10/10)
+=========================================
+- new funtion DataMenue added
+
+Script::Toolbox version 0.45 (2014/10/09)
+=========================================
+- bugfix in some test scripts ($^X)
+
 Script::Toolbox version 0.45 (2013/01/24)
 =========================================
 - bugfix in Util::File, write arrayref with record separator
@@ -176,9 +184,9 @@ This module requires these other modules and libraries:
 	
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2002-2004 Matthias Eckardt, eckardt & braun GmbH
+Copyright (C) 2002-2014 Matthias Eckardt, imunixx GmbH
 
-matthias.eckardt@link-up.de
+matthias.eckardt@imunixx.de
 http://www.link-up.de
 
 This library is free software; you can redistribute it and/or modify

@@ -22,7 +22,7 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Script::Toolbox::Util ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
-our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue KeyMap Stat TmpFile) ] );
+our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File System Now Menue KeyMap Stat TmpFile DataMenue) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -30,7 +30,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.46';
+our $VERSION = '0.47';
 
 # Preloaded methods go here.
 sub _getKV(@);
@@ -887,7 +887,77 @@ sub Menue($)
     }
     return $o,$opts;
 }
+ 
+#------------------------------------------------------------------------------
+# Prepare input for Data Menue. Allowed input formats:
+# INPUT1: 'value1 value2 ..'
+# INPUT2: [{'label'=>'Max','value'=>'foo'},{'label'=>'Tim','value'=>99}]
+#------------------------------------------------------------------------------
+sub _addData($$$)
+{
+    my ($dataMenue,$opts,$frame) = @_;
 
+    if(ref $opts eq 'ARRAY') {
+        foreach my $line ( @{$opts} ) {
+            next    if( ref $line ne 'HASH' );
+            next    if( ! defined $line-{'label'} );
+            next    if( ! defined $line-{'value'} );
+            push @{$dataMenue}, $line,
+         }
+         return 'ARRAY';
+    }elsif(ref $opts eq '' ) {
+        my $i=1;
+        foreach my $l ( split /\s+/, $opts ) {
+            my $line = {'label' => 'V'.$i++, 'value' => $l};
+            push @{$dataMenue}, $line,
+        }
+        return 'SCALAR' if( ! defined $frame );
+        push @{$dataMenue}, {'header' => $frame->{'header'}} if( defined $frame->{'header'});
+        push @{$dataMenue}, {'footer' => $frame->{'footer'}} if( defined $frame->{'footer'});
+        return 'SCALAR';
+    }
+}
+
+#------------------------------------------------------------------------------
+# Remove {label=>"EXIT"} line.
+#------------------------------------------------------------------------------
+sub _returnArray($) {
+    my ($dataMenue) = @_;
+    splice @{$dataMenue},0,1;
+    return $dataMenue;
+}
+
+#------------------------------------------------------------------------------
+# Remove {label=>"EXIT"} line. Return values as white space concatenated string.
+#------------------------------------------------------------------------------
+sub _returnScalar($) {
+    my ($dataMenue) = @_;
+
+    splice @{$dataMenue},0,1;
+    my     $data;
+    map {  $data .= $_->{'value'} .' '} @{$dataMenue};
+    chop   $data;
+    return $data;
+}
+
+#------------------------------------------------------------------------------
+# Use Menue to edit small data sets. Two input formats allowed.
+# INPUT1: 'value1 value2 ..'
+# INPUT2: [{'label'=>'Max','value'=>'foo'},{'label'=>'Tim','value'=>99}]
+#------------------------------------------------------------------------------
+sub DataMenue(@) {
+    my ($opts,$head) = @_;
+
+    my $dataMenue = [{label=>"EXIT"}];
+    my $format    = _addData($dataMenue, $opts,$head);
+
+    while( 1 ) {
+        my ($o,$dataMenue) = Menue($dataMenue);
+        last if( $o == 0 );
+    }
+    return _returnArray( $dataMenue) if( $format eq 'ARRAY' );
+    return _returnScalar($dataMenue) if( $format eq 'SCALAR');
+}
 #------------------------------------------------------------------------------
 #  Read a directory and return a hash with filenames stat() structure infos
 #  for every file. An optional pattern (regexp) may be used for selecting files.

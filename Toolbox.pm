@@ -17,7 +17,9 @@ our @ISA = qw(Script::Toolbox::Util Script::Toolbox::Util::Opt Exporter);
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
 our %EXPORT_TAGS = ( 'all' => [ qw(Open Log Exit Table Usage Dir File
-						           System Now Menue KeyMap Stat TmpFile) ] );
+						           System Now Menue KeyMap Stat TmpFile
+                                   DataMenue
+                                  ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
@@ -25,7 +27,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.46';
+our $VERSION = '0.47';
 
 
 # Preloaded methods go here.
@@ -203,8 +205,11 @@ Script::Toolbox - Framework for the daily business scripts
                               {header=>'This is the optional footer line.'}]);
   print "Second Option" if( $resp == 2 );
 
+  #----------------
+  # Data Menues 
+  #----------------
   # using Menue to display and edit some few data values
-  my $dataMene = [{label=>"EXIT"},
+  my $dataMenue = [{label=>"EXIT"},
                   {label=>"Name",value=>""},
                   {label=>"ZIP", value=>"01468"},
                   {label=>"City",value=>"Templeton"} ];
@@ -213,14 +218,14 @@ Script::Toolbox - Framework for the daily business scripts
     my ($o,$dataMenue) = Menue($dataMenue);
     last if( $o == 0 );
   }
-                
-  # this is the output:
-  # 0 EXIT
-  # 1 Name  []
-  # 2 ZIP   [01468]
-  # 3 City  [Templeton]
-  #
-  # Select: 
+
+  # or ...
+  my $dataMenue = [{label=>"Name",value=>""},
+                  {label=>"ZIP", value=>"01468"},
+                  {label=>"City",value=>"Templeton"} ];
+  $dataMenue = DataMenue($dataMenue)
+  my $data   = DataMenue('aaa bbb ccc');
+  my $data   = DataMenue('aaa bbb ccc',{'header'=>'Top Line', 'footer'=>'Bottom Line'});
 
 =head1 ABSTRACT
 
@@ -477,6 +482,16 @@ these keys will be printed on top resp. below the option lines.
 Regular menues may use the optional keys 'jump' and 'argv'. Jump points
 to a handler subroutine. Argv points to the arguments of the handler
 subroutine.
+
+=item DataMenue
+
+This is a convenient version to edit values via Menue function. It includes
+an endless loop and an automatic generated EXIT label and exit handling.
+The edited values will be returned. Acceptable input are the same array with
+'label', 'value' hash or a simple white space separated scalar value.
+In case of simple scalar input an optional hash with 'header' and/or 'footer'
+keys may be given as second parameter.
+
 
 =head1 SIGNALS
 
